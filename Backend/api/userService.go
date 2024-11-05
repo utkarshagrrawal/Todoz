@@ -10,7 +10,6 @@ import (
 	model "todolist/models"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -28,10 +27,6 @@ func GetUserDetailsByEmail(email string) (u model.User, err error) {
 }
 
 func LoginUser(u *model.UserLogin) (tokenStr, message string, err error) {
-	err = godotenv.Load()
-	if err != nil {
-		return "", "Error loading .env file", err
-	}
 	singleResult := db.UserCollection.FindOne(context.TODO(), bson.M{"email": u.Email})
 	if singleResult.Err() != nil {
 		return "", "Error getting user", singleResult.Err()

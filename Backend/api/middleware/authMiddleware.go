@@ -8,17 +8,10 @@ import (
 	model "todolist/models"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
 
 func VerifyToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := godotenv.Load()
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode("Error reading .env file")
-			return
-		}
 		ckie, err := r.Cookie("token")
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
