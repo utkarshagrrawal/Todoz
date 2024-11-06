@@ -2,9 +2,11 @@ package main
 
 import (
 	"net/http"
+	"os"
 	routes "todolist/api/routers"
 )
 
 func main() {
-	http.ListenAndServe(":8080", routes.UserRouter())
+	port := ":" + os.Getenv("port")
+	http.ListenAndServe(port, routes.UserRouter())
 }
