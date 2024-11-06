@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	port := ":" + os.Getenv("port")
+	port := ":" + os.Getenv("PORT")
 	http.ListenAndServe(port, routes.UserRouter())
 }
