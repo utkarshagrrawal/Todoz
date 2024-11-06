@@ -58,6 +58,7 @@ func LoginIntoTodoz(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		MaxAge:   86400,
 		SameSite: http.SameSiteNoneMode,
+		HttpOnly: true,
 	}
 	if os.Getenv("ENV") != "dev" {
 		tokenCookie.Secure = true
