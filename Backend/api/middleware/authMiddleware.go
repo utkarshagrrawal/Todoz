@@ -29,8 +29,8 @@ func VerifyToken(next http.Handler) http.Handler {
 				json.NewEncoder(w).Encode("Token expired")
 				return
 			}
-			json.NewEncoder(w).Encode("Error while parsing token")
 			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode("Error while parsing token")
 			return
 		}
 		var contextKey = model.ContextKey("payload")

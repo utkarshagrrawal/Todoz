@@ -11,6 +11,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -58,6 +59,12 @@ func CreateUser(user *model.User) (message string) {
 	if len(user.Password) > 48 {
 		return "Password must be less than 48 digits"
 	}
+	userDetails := db.UserCollection.FindOne(context.TODO(), bson.M{"email": user.Email})
+	if userDetails.Err() == nil {
+		return "User already exists with this mail"
+	} else if userDetails.Err() != mongo.ErrNoDocuments {
+		return "Error while indexing DB for user"
+	}
 	passwordBytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return "Password cannot be encrypted"
@@ -70,7 +77,7 @@ func CreateUser(user *model.User) (message string) {
 		fmt.Println(err)
 		return "Error while inserting into DB"
 	}
-	return "User created successfully"
+	return "Account created successfully"
 }
 
 func UpdateUserPassword(email, password string) (message string, err error) {
