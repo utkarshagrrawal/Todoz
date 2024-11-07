@@ -186,7 +186,7 @@ export default function TaskHome() {
                 <select
                   name="priority"
                   value={task.priority}
-                  onChange={() => {
+                  onChange={(e) => {
                     setTasks((prev) =>
                       prev.map((t) =>
                         t._id === task._id
@@ -194,6 +194,7 @@ export default function TaskHome() {
                           : t
                       )
                     );
+                    task.priority = e.target.value;
                     handleTaskEdit(task);
                   }}
                   className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
