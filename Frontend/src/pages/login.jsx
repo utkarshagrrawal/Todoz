@@ -9,6 +9,7 @@ export default function Login() {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const searchParams = new URLSearchParams(window.location.search);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,8 +57,12 @@ export default function Login() {
       )
       .then((res) => {
         if (res.data == "Login successfull") {
-          navigate("/");
           SuccessNotify(res.data);
+          if (searchParams.get("redirect")) {
+            navigate(decodeURIComponent(searchParams.get("redirect")));
+          } else {
+            navigate("/");
+          }
         } else {
           ErrorNotify(res.data);
         }
@@ -120,9 +125,6 @@ export default function Login() {
               />
               Remember me
             </label>
-            <a href="#" className="text-sm text-blue-500 hover:underline">
-              Forgot password?
-            </a>
           </div>
 
           <button

@@ -4,6 +4,9 @@ import Login from "./pages/login";
 import Signup from "./pages/signup";
 import toast, { Toaster, useToasterStore } from "react-hot-toast";
 import { useEffect } from "react";
+import ContactUs from "./pages/contactUs";
+import AboutUs from "./pages/aboutUs";
+import TaskHome from "./pages/tasks/taskHome";
 
 function App() {
   const { toasts } = useToasterStore();
@@ -22,6 +25,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/tasks" element={<TaskHome />} />
       </Routes>
     </BrowserRouter>
   );

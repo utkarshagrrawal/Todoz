@@ -18,5 +18,8 @@ func UserRouter() *mux.Router {
 	r.HandleFunc("/api/login", handler.LoginIntoTodoz).Methods("POST", "OPTIONS")
 	r.Handle("/api/user/details", middleware.VerifyToken(http.HandlerFunc(handler.GetUserDetails))).Methods("GET", "OPTIONS")
 
+	r.Handle("/api/tasks/list", middleware.VerifyToken(http.HandlerFunc(handler.GetTasksByUser))).Methods("GET", "OPTIONS")
+	r.Handle("/api/tasks/create", middleware.VerifyToken(http.HandlerFunc(handler.CreateTaskForUser))).Methods("POST", "OPTIONS")
+
 	return r
 }

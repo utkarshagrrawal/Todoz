@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var client *mongo.Client
 var UserCollection *mongo.Collection
+var TasksCollection *mongo.Collection
 
 func init() {
 	mongoDBUrl := os.Getenv("MONGODB_URI")
@@ -19,4 +19,5 @@ func init() {
 		log.Fatal(err)
 	}
 	UserCollection = client.Database("todoz").Collection("users")
+	TasksCollection = client.Database("todoz").Collection("tasks")
 }

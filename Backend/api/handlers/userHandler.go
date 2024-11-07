@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	service "todolist/api"
+	service "todolist/api/services"
 	model "todolist/models"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -57,10 +57,10 @@ func LoginIntoTodoz(w http.ResponseWriter, r *http.Request) {
 		Name:     "token",
 		Value:    token,
 		MaxAge:   86400,
-		SameSite: http.SameSiteNoneMode,
 		HttpOnly: true,
 	}
 	if os.Getenv("ENV") != "dev" {
+		tokenCookie.SameSite = http.SameSiteNoneMode
 		tokenCookie.Secure = true
 	}
 	http.SetCookie(w, &tokenCookie)
