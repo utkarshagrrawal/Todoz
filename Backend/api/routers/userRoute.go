@@ -13,6 +13,7 @@ func UserRouter() *mux.Router {
 
 	r.Use(middleware.ApplyCors)
 	r.Use(middleware.RequestsLogging)
+	r.Use(middleware.CatchError)
 
 	r.HandleFunc("/api/create", handler.CreateTodozUser).Methods("POST", "OPTIONS")
 	r.HandleFunc("/api/login", handler.LoginIntoTodoz).Methods("POST", "OPTIONS")
