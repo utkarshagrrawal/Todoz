@@ -30,7 +30,7 @@ type UserResponse struct {
 }
 
 type Tasks struct {
-	TaskId      bson.ObjectID `bson:"_id" json:"_id"`
+	TaskId      bson.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	UserEmail   string        `bson:"user_email" json:"user_email"`
 	Description string        `bson:"description" json:"description"`
 	Status      string        `bson:"status" json:"status"`

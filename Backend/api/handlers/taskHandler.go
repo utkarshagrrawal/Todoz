@@ -74,7 +74,7 @@ func CreateTaskForUser(w http.ResponseWriter, r *http.Request) {
 	}
 	task.UserEmail = email
 	msg := service.CreateTask(&task)
-	if msg != "Task created succesfully" {
+	if msg != "Task created successfully" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(msg)
 		return

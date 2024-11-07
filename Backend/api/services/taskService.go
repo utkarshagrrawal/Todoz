@@ -42,5 +42,5 @@ func CreateTask(t *model.Tasks) string {
 	if err != nil {
 		return "Error while creating task"
 	}
-	return "Task created succesfully"
+	return "Task created successfully"
 }
