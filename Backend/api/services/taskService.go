@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 	"todolist/db"
 	model "todolist/models"
@@ -43,4 +44,13 @@ func CreateTask(t *model.Tasks) string {
 		return "Error while creating task"
 	}
 	return "Task created successfully"
+}
+
+func UpdateTaskDetails(t *model.Tasks) string {
+	_, err := db.TasksCollection.UpdateByID(context.TODO(), t.TaskId, bson.M{"$set": bson.M{"is_completed": t.IsCompleted, "priority": t.Priority, "description": t.Description, "deadline": t.Deadline, "status": t.Status}})
+	if err != nil {
+		fmt.Println(err)
+		return "Error while updating the task"
+	}
+	return "Task details updated"
 }

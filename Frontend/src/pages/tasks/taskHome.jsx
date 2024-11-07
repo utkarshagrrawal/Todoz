@@ -5,7 +5,10 @@ import {
   DismissToast,
   ErrorNotify,
   LoadingNotify,
+  SuccessNotify,
 } from "../../components/toast";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function TaskHome() {
   const [userDetails, setUserDetails] = useState({});
@@ -80,7 +83,7 @@ export default function TaskHome() {
     }
     const toastId = LoadingNotify("Adding new task...");
     let deadline = new Date();
-    deadline.setHours(24, 0, 0, 0);
+    deadline.setHours(23, 59, 59, 999);
     taskData.deadline = deadline;
     taskData.status = taskData.completed ? "completed" : "pending";
     axios
@@ -88,8 +91,8 @@ export default function TaskHome() {
         withCredentials: true,
       })
       .then((res) => {
-        if (res.data == "Task created successfully") {
-          setTasks((prev) => [taskData, ...prev]);
+        if (res.data === "Task created successfully") {
+          setTasks((prev) => [...prev, taskData]);
           setTaskData({
             description: "",
             priority: "low",
@@ -115,7 +118,7 @@ export default function TaskHome() {
         withCredentials: true,
       })
       .then((res) => {
-        if (res.data == "Task updated successfully") {
+        if (res.data === "Task details updated") {
           SuccessNotify(res.data);
         } else {
           ErrorNotify(res.data);
@@ -147,31 +150,38 @@ export default function TaskHome() {
                 <input
                   type="checkbox"
                   className="size-7 text-blue-500 border-gray-500 rounded-full transition-all"
-                  value={task.completed}
-                  onChange={() => {
+                  checked={task.is_completed}
+                  onChange={(e) => {
                     setTasks((prev) =>
                       prev.map((t) =>
                         t._id === task._id
-                          ? { ...t, completed: !t.completed }
+                          ? { ...t, is_completed: e.target.checked }
                           : t
                       )
                     );
+                    task.is_completed = e.target.checked;
                     handleTaskEdit(task);
                   }}
                 />
                 <input
-                  className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className={`w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                    task.status === "overdue"
+                      ? "bg-red-700"
+                      : task.status === "completed"
+                      ? "bg-green-700"
+                      : ""
+                  }`}
                   value={task.description}
-                  onChange={() => {
+                  onChange={(e) =>
                     setTasks((prev) =>
                       prev.map((t) =>
                         t._id === task._id
-                          ? { ...t, description: task.description }
+                          ? { ...t, description: e.target.value }
                           : t
                       )
-                    );
-                    handleTaskEdit(task);
-                  }}
+                    )
+                  }
+                  onKeyDown={(e) => e.key === "Enter" && handleTaskEdit(task)}
                 />
                 <select
                   name="priority"
@@ -180,7 +190,7 @@ export default function TaskHome() {
                     setTasks((prev) =>
                       prev.map((t) =>
                         t._id === task._id
-                          ? { ...t, priority: task.priority }
+                          ? { ...t, priority: e.target.value }
                           : t
                       )
                     );
@@ -192,6 +202,23 @@ export default function TaskHome() {
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                 </select>
+                <DatePicker
+                  selected={task.deadline}
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  minDate={new Date()}
+                  onChange={(date) => {
+                    setTasks((prev) =>
+                      prev.map((t) =>
+                        t._id === task._id ? { ...t, deadline: date } : t
+                      )
+                    );
+                    task.deadline = new Date(date).toISOString();
+                    handleTaskEdit(task);
+                  }}
+                  className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
               </div>
             ))}
           <div className="flex items-center space-x-4">
