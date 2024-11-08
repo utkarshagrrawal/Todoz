@@ -36,7 +36,7 @@ export default function Home() {
               productive!
             </p>
             <Link
-              to="/tasks"
+              to="/tasks/home"
               className="bg-white text-blue-600 font-semibold text-lg px-6 py-3 rounded-full shadow hover:bg-gray-100 transition"
             >
               Go to Your Tasks

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"time"
 	"todolist/db"
 	model "todolist/models"
@@ -11,13 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func GetTasks(email string, page int) ([]model.Tasks, error) {
+func GetTodayPendingTasks(email string, page int) ([]model.Tasks, error) {
 	skip := int64((page - 1) * 20)
 	findOptions := options.Find()
 	findOptions.SetLimit(20)
 	findOptions.SetSkip(skip)
 	findOptions.SetSort(bson.D{{Key: "created_at", Value: 1}})
-	cur, err := db.TasksCollection.Find(context.TODO(), bson.D{{Key: "user_email", Value: email}}, findOptions)
+	cur, err := db.TasksCollection.Find(context.TODO(), bson.D{{Key: "user_email", Value: email}, {Key: "is_completed", Value: false}, {Key: "deadline", Value: bson.D{{Key: "$lt", Value: time.Now().AddDate(0, 0, 1)}}}}, findOptions)
 	var tasks []model.Tasks
 	if err != nil {
 		return tasks, err
@@ -25,8 +24,29 @@ func GetTasks(email string, page int) ([]model.Tasks, error) {
 	defer cur.Close(context.TODO())
 	for cur.Next(context.TODO()) {
 		var task model.Tasks
-		err := cur.Decode(&task)
-		if err != nil {
+		if err := cur.Decode(&task); err != nil {
+			return tasks, err
+		}
+		tasks = append(tasks, task)
+	}
+	return tasks, nil
+}
+
+func GetNonCompletedTasks(email string, page int) ([]model.Tasks, error) {
+	skip := int64((page - 1) * 20)
+	findOptions := options.Find()
+	findOptions.SetSkip(skip)
+	findOptions.SetLimit(20)
+	findOptions.SetSort(bson.M{"created_at": 1})
+	cur, err := db.TasksCollection.Find(context.TODO(), bson.D{{Key: "user_email", Value: email}, {Key: "is_completed", Value: false}}, findOptions)
+	if err != nil {
+		return []model.Tasks{}, err
+	}
+	defer cur.Close(context.TODO())
+	var tasks []model.Tasks
+	for cur.Next(context.TODO()) {
+		var task model.Tasks
+		if err := cur.Decode(&task); err != nil {
 			return tasks, err
 		}
 		tasks = append(tasks, task)
@@ -49,7 +69,6 @@ func CreateTask(t *model.Tasks) string {
 func UpdateTaskDetails(t *model.Tasks) string {
 	_, err := db.TasksCollection.UpdateByID(context.TODO(), t.TaskId, bson.M{"$set": bson.M{"is_completed": t.IsCompleted, "priority": t.Priority, "description": t.Description, "deadline": t.Deadline, "status": t.Status}})
 	if err != nil {
-		fmt.Println(err)
 		return "Error while updating the task"
 	}
 	return "Task details updated"

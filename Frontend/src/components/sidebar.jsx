@@ -19,9 +19,10 @@ export default function Sidebar({ userDetails, selectedTab, setSelectedTab }) {
 
       <nav>
         <ul className="space-y-4">
-          <li>
+          <li className={`${selectedTab === "home" && "text-blue-600"}`}>
             <Link
-              to="/tasks"
+              to="/tasks/home"
+              onClick={() => setSelectedTab("home")}
               className="flex items-center gap-3 text-lg hover:text-blue-300 transition"
             >
               <svg
@@ -40,9 +41,12 @@ export default function Sidebar({ userDetails, selectedTab, setSelectedTab }) {
               </svg>
             </Link>
           </li>
-          <li>
+          <li
+            className={`${selectedTab === "not-completed" && "text-blue-600"}`}
+          >
             <Link
-              to="/tasks"
+              to="/tasks/not-completed"
+              onClick={() => setSelectedTab("not-completed")}
               className="flex items-center gap-3 text-lg hover:text-blue-300 transition"
             >
               <svg
@@ -61,9 +65,10 @@ export default function Sidebar({ userDetails, selectedTab, setSelectedTab }) {
               </svg>
             </Link>
           </li>
-          <li>
+          <li className={`${selectedTab === "completed" && "text-blue-600"}`}>
             <Link
-              to="/completed"
+              to="/tasks/completed"
+              onClick={() => setSelectedTab("completed")}
               className="flex items-center gap-3 text-lg hover:text-blue-300 transition"
             >
               <svg
@@ -89,7 +94,7 @@ export default function Sidebar({ userDetails, selectedTab, setSelectedTab }) {
         <img
           src={userDetails.gender === "male" ? MaleAvatar : FemaleAvatar}
           alt="User"
-          className="w-8 h-8 rounded-full object-cover shadow-lg"
+          className="w-8 h-8 rounded-full object-cover shadow-lg cursor-pointer"
           onClick={() => navigate("/profile")}
         />
       </section>

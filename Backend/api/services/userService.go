@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -53,12 +52,6 @@ func LoginUser(u *model.UserLogin) (string, string, error) {
 }
 
 func CreateUser(user *model.User) string {
-	if !user.IsValid() {
-		return "User details are invalid"
-	}
-	if len(user.Password) > 48 {
-		return "Password must be less than 48 digits"
-	}
 	userDetails := db.UserCollection.FindOne(context.TODO(), bson.M{"email": user.Email})
 	if userDetails.Err() == nil {
 		return "User already exists with this mail"
@@ -74,40 +67,43 @@ func CreateUser(user *model.User) string {
 	user.Password = passwordString.String()
 	_, err = db.UserCollection.InsertOne(context.TODO(), user)
 	if err != nil {
-		fmt.Println(err)
 		return "Error while inserting into DB"
 	}
 	return "Account created successfully"
 }
 
-func UpdateUserPassword(email, password string) (string, error) {
-	hashedPasswordBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func UpdateUserPassword(u *model.ChangeCredentials) (string, error) {
+	singleResult := db.UserCollection.FindOne(context.Background(), bson.M{"email": u.Email, "isDeleted": false})
+	if singleResult.Err() != nil {
+		return "Error getting user details", singleResult.Err()
+	}
+	var userDetails model.UserLogin
+	if err := singleResult.Decode(&userDetails); err != nil {
+		return "Error parsing user details", err
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(userDetails.Password), []byte(u.OldPassword)); err != nil {
+		return "Passwords do not match", err
+	}
+	hashedPasswordBytes, err := bcrypt.GenerateFromPassword([]byte(u.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return "Error hashing password", err
 	}
 	var hashedPassword strings.Builder
 	hashedPassword.Write(hashedPasswordBytes)
-	_, err = db.UserCollection.UpdateOne(context.TODO(), bson.M{"email": email}, bson.M{"$set": bson.M{"password": hashedPassword.String()}})
+	_, err = db.UserCollection.UpdateOne(context.TODO(), bson.M{"email": u.Email}, bson.M{"$set": bson.M{"password": hashedPassword.String()}})
 	if err != nil {
 		return "Error updating password", err
 	}
 	return "Password updated successfully", nil
 }
 
-func UpdateUserPhone(email string, phone string) (string, error) {
-	_, err := db.UserCollection.UpdateOne(context.TODO(), bson.M{"email": email}, bson.M{"$set": bson.M{"phone": phone}})
+func UpdateUserDetails(u *model.User) string {
+	updateQuery := bson.D{{Key: "name", Value: u.Name}, {Key: "email", Value: u.Email}, {Key: "gender", Value: u.Gender}, {Key: "phone", Value: u.Phone}}
+	_, err := db.UserCollection.UpdateOne(context.Background(), bson.D{{Key: "email", Value: u.Email}}, updateQuery)
 	if err != nil {
-		return "Error updating phone", err
+		return "Error while updating user details"
 	}
-	return "Phone updated successfully", nil
-}
-
-func UpdateUserName(email string, name string) (string, error) {
-	_, err := db.UserCollection.UpdateOne(context.TODO(), bson.M{"email": email}, bson.M{"$set": bson.M{"name": name}})
-	if err != nil {
-		return "Error updating name", err
-	}
-	return "Name updated successfully", nil
+	return "User details updated successfully"
 }
 
 func DeleteUser(email string) (string, error) {

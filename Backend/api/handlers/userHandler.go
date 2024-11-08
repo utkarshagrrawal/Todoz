@@ -12,13 +12,22 @@ import (
 )
 
 func CreateTodozUser(w http.ResponseWriter, r *http.Request) {
-	// create a new user
 	w.Header().Set("Content-Type", "application/json")
 	var userDetails model.User
 	err := json.NewDecoder(r.Body).Decode(&userDetails)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode("User details cannot be read")
+		return
+	}
+	if !userDetails.IsValid() {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("User details are invalid")
+		return
+	}
+	if len(userDetails.Password) > 48 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Password must be less than 48 digits")
 		return
 	}
 	msg := service.CreateUser(&userDetails)
@@ -95,4 +104,45 @@ func GetUserDetails(w http.ResponseWriter, r *http.Request) {
 		IsVerified: user.IsVerified,
 	}
 	json.NewEncoder(w).Encode(userResponse)
+}
+
+func UpdateUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var userPasswords model.ChangeCredentials
+	err := json.NewDecoder(r.Body).Decode(&userPasswords)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+	if userPasswords.NewPassword != userPasswords.ConfirmPassword {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Passwords do not match")
+		return
+	}
+	if len(userPasswords.NewPassword) > 48 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Password should be of max 48 characters")
+		return
+	}
+	jwtClaims, ok := r.Context().Value(model.ContextKey("payload")).(jwt.MapClaims)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error fetching user details")
+		return
+	}
+	email, ok := jwtClaims["email"].(string)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error decoding user details")
+		return
+	}
+	userPasswords.Email = email
+	msg, err := service.UpdateUserPassword(&userPasswords)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+	json.NewEncoder(w).Encode(msg)
 }

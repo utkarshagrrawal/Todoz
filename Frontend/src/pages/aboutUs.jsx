@@ -81,6 +81,29 @@ export default function AboutUs() {
             Contact Us
           </Link>
         </section>
+
+        <section className="w-full max-w-4xl mx-auto text-center py-12 bg-gray-50 rounded-lg shadow-md mt-8 mb-16">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+            Notes & Extra Information
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Please note that the backend is hosted on Render, so pages may
+            occasionally take up to 2 minutes to load due to server spin-up
+            times.
+          </p>
+          <p className="text-gray-600">
+            Website logo attribution:
+            <a
+              href="https://www.flaticon.com/free-icons/todo"
+              title="todo icons"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              Todo icons created by Freepik - Flaticon
+            </a>
+          </p>
+        </section>
       </div>
       <Footer />
     </>

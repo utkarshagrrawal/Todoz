@@ -29,6 +29,13 @@ type UserResponse struct {
 	IsVerified bool   `bson:"isVerified" json:"isVerified"`
 }
 
+type ChangeCredentials struct {
+	Email           string `bson:"email" json:"email"`
+	OldPassword     string `bson:"oldPassword" json:"oldPassword"`
+	NewPassword     string `bson:"newPassword" json:"newPassword"`
+	ConfirmPassword string `bson:"confirmPassword" json:"confirmPassword"`
+}
+
 type Tasks struct {
 	TaskId      bson.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	UserEmail   string        `bson:"user_email" json:"user_email"`
