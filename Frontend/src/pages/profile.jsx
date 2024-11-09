@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import MaleAvatar from "../assets/male-avatar.jpg";
 import FemaleAvatar from "../assets/female-avatar.jpg";
 import { Link } from "react-router-dom";
-import { ErrorNotify } from "../components/toast";
+import { ErrorNotify, SuccessNotify } from "../components/toast";
 
 export default function Profile() {
   const [userDetails, setUserDetails] = useState({
@@ -37,7 +37,47 @@ export default function Profile() {
     }));
   };
 
-  const handleUpdate = (e) => {};
+  const handleUpdate = (e) => {
+    e.preventDefault();
+
+    axios
+      .put(
+        import.meta.env.VITE_API_URL + "/api/user/update-details",
+        userDetails,
+        {
+          withCredentials: true,
+        }
+      )
+      .then((res) => {
+        SuccessNotify("User details updated successfully");
+        if (res.data === "User login details updated successfully") {
+          window.location.href =
+            "/login?redirect=" + encodeURIComponent("/profile");
+        } else if (res.data === "User details updated successfully") {
+          window.location.href = "/profile";
+        }
+      })
+      .catch((err) => {
+        ErrorNotify(err.response?.data);
+      });
+  };
+
+  const handleLogout = () => {
+    axios
+      .post(
+        import.meta.env.VITE_API_URL + "/api/user/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      )
+      .then(() => {
+        window.location.href = "/login";
+      })
+      .catch((err) => {
+        ErrorNotify(err.response?.data);
+      });
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -78,7 +118,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <form id="myForm" className="space-y-6">
+        <form id="myForm" onSubmit={handleUpdate} className="space-y-6">
           <div className="flex flex-col">
             <label className="text-gray-700 font-medium">Full Name</label>
             <input
@@ -144,7 +184,10 @@ export default function Profile() {
           >
             Change password
           </Link>
-          <button className="bg-red-500 text-white font-medium px-6 py-2 rounded-lg shadow-md hover:bg-red-600 transition">
+          <button
+            className="bg-red-500 text-white font-medium px-6 py-2 rounded-lg shadow-md hover:bg-red-600 transition"
+            onClick={handleLogout}
+          >
             Log Out
           </button>
         </div>

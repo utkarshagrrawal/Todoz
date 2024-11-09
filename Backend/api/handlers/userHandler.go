@@ -67,6 +67,7 @@ func LoginIntoTodoz(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		MaxAge:   86400,
 		HttpOnly: true,
+		Path:     "/api",
 	}
 	if os.Getenv("ENV") != "dev" {
 		tokenCookie.SameSite = http.SameSiteNoneMode
@@ -145,4 +146,67 @@ func UpdateUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(msg)
+}
+
+func UpdateUserDetailsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	jwtClaims, ok := r.Context().Value(model.ContextKey("payload")).(jwt.MapClaims)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error reading the user detail")
+		return
+	}
+	email, ok := jwtClaims["email"].(string)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error reading the user detail")
+		return
+	}
+	var userDetails model.User
+	err := json.NewDecoder(r.Body).Decode(&userDetails)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error reading the user detail")
+		return
+	}
+	msg := service.UpdateUserDetails(&userDetails, email)
+	if msg != "User details updated successfully" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+	if email != userDetails.Email {
+		cookie := http.Cookie{
+			Name:     "token",
+			Value:    "invalid",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Path:     "/api",
+		}
+		if os.Getenv("ENV") != "dev" {
+			cookie.SameSite = http.SameSiteNoneMode
+			cookie.Secure = true
+		}
+		http.SetCookie(w, &cookie)
+		json.NewEncoder(w).Encode("User login details updated successfully")
+		return
+	}
+	json.NewEncoder(w).Encode(msg)
+}
+
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	cookie := http.Cookie{
+		Name:     "token",
+		Value:    "invalid",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Path:     "/api",
+	}
+	if os.Getenv("ENV") != "dev" {
+		cookie.SameSite = http.SameSiteNoneMode
+		cookie.Secure = true
+	}
+	http.SetCookie(w, &cookie)
+	json.NewEncoder(w).Encode("Logged out successfully")
 }

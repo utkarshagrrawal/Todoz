@@ -43,7 +43,7 @@ export default function Login() {
     setLoading(true);
     axios
       .post(
-        import.meta.env.VITE_API_URL + "/api/login",
+        import.meta.env.VITE_API_URL + "/api/user/login",
         {
           email: loginData.email,
           password: loginData.password,

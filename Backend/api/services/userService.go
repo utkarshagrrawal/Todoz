@@ -97,11 +97,17 @@ func UpdateUserPassword(u *model.ChangeCredentials) (string, error) {
 	return "Password updated successfully", nil
 }
 
-func UpdateUserDetails(u *model.User) string {
-	updateQuery := bson.D{{Key: "name", Value: u.Name}, {Key: "email", Value: u.Email}, {Key: "gender", Value: u.Gender}, {Key: "phone", Value: u.Phone}}
-	_, err := db.UserCollection.UpdateOne(context.Background(), bson.D{{Key: "email", Value: u.Email}}, updateQuery)
+func UpdateUserDetails(u *model.User, email string) string {
+	updateQuery := bson.D{{Key: "$set", Value: bson.D{{Key: "name", Value: u.Name}, {Key: "email", Value: u.Email}, {Key: "gender", Value: u.Gender}, {Key: "phone", Value: u.Phone}}}}
+	_, err := db.UserCollection.UpdateOne(context.Background(), bson.D{{Key: "email", Value: email}}, updateQuery)
 	if err != nil {
-		return "Error while updating user details"
+		return "Error updating user details"
+	}
+	if u.Email != email {
+		_, err = db.TasksCollection.UpdateMany(context.TODO(), bson.D{{Key: "user_email", Value: email}}, bson.D{{Key: "$set", Value: bson.D{{Key: "user_email", Value: u.Email}}}})
+		if err != nil {
+			return "Error updating task details"
+		}
 	}
 	return "User details updated successfully"
 }

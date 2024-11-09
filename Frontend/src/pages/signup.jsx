@@ -45,7 +45,7 @@ export default function Signup() {
     setLoading(true);
     axios
       .post(
-        import.meta.env.VITE_API_URL + "/api/create",
+        import.meta.env.VITE_API_URL + "/api/user/create",
         JSON.stringify(signupData),
         {
           headers: {

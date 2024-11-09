@@ -15,9 +15,11 @@ func UserRouter() *mux.Router {
 	r.Use(middleware.RequestsLogging)
 	r.Use(middleware.CatchError)
 
-	r.HandleFunc("/api/create", handler.CreateTodozUser).Methods("POST", "OPTIONS")
-	r.HandleFunc("/api/login", handler.LoginIntoTodoz).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/user/create", handler.CreateTodozUser).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/user/login", handler.LoginIntoTodoz).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/user/logout", handler.LogoutUser).Methods("POST", "OPTIONS")
 	r.Handle("/api/user/details", middleware.VerifyToken(http.HandlerFunc(handler.GetUserDetails))).Methods("GET", "OPTIONS")
+	r.Handle("/api/user/update-details", middleware.VerifyToken(http.HandlerFunc(handler.UpdateUserDetailsHandler))).Methods("PUT", "OPTIONS")
 	r.Handle("/api/user/change-password", middleware.VerifyToken(http.HandlerFunc(handler.UpdateUserPasswordHandler))).Methods("POST", "OPTIONS")
 
 	r.Handle("/api/tasks/today", middleware.VerifyToken(http.HandlerFunc(handler.GetTodayPendingUserTasks))).Methods("GET", "OPTIONS")
