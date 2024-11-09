@@ -24,7 +24,7 @@ func VerifyToken(next http.Handler) http.Handler {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 		if err != nil {
-			if err == jwt.ErrSignatureInvalid {
+			if err == jwt.ErrTokenExpired {
 				w.WriteHeader(http.StatusUnauthorized)
 				json.NewEncoder(w).Encode("Token expired")
 				return
