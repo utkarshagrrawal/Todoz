@@ -54,6 +54,28 @@ func GetNonCompletedTasks(email string, page int) ([]model.Tasks, error) {
 	return tasks, nil
 }
 
+func GetCompletedTasks(email string, page int) ([]model.Tasks, error) {
+	skip := int64((page - 1) * 20)
+	findOptions := options.Find()
+	findOptions.SetLimit(20)
+	findOptions.SetSkip(skip)
+	findOptions.SetSort(bson.D{{Key: "created_at", Value: 1}})
+	var tasks []model.Tasks
+	cur, err := db.TasksCollection.Find(context.TODO(), bson.D{{Key: "user_email", Value: email}, {Key: "is_completed", Value: true}}, findOptions)
+	if err != nil {
+		return tasks, err
+	}
+	defer cur.Close(context.TODO())
+	for cur.Next(context.TODO()) {
+		var task model.Tasks
+		if err := cur.Decode(&task); err != nil {
+			return tasks, err
+		}
+		tasks = append(tasks, task)
+	}
+	return tasks, err
+}
+
 func CreateTask(t *model.Tasks) string {
 	if !t.IsValid() {
 		return "Invalid payload"

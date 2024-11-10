@@ -16,12 +16,13 @@ export default function NonCompletedTasks() {
   const scroll = useRef(0);
 
   useEffect(() => {
-    const observer = window.addEventListener("scroll", () => {
+    const observer = () => {
       if (window.scrollY - scroll.current > 100) {
         setPage((prev) => prev + 1);
         scroll.current = window.scrollY;
       }
-    });
+    };
+    window.addEventListener("scroll", observer);
     return () => window.removeEventListener("scroll", observer);
   }, []);
 

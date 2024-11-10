@@ -93,6 +93,42 @@ func GetNonCompletedUserTasks(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tasks)
 }
 
+func GetCompletedUserTasks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	jwtClaims, ok := r.Context().Value(model.ContextKey("payload")).(jwt.MapClaims)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error getting user details")
+		return
+	}
+	email, ok := jwtClaims["email"].(string)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error getting user details")
+		return
+	}
+	values := r.URL.Query()
+	page := values.Get("page")
+	if page == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error getting page details")
+		return
+	}
+	num, err := strconv.Atoi(page)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error getting page details")
+		return
+	}
+	tasks, err := service.GetCompletedTasks(email, num)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error getting tasks")
+		return
+	}
+	json.NewEncoder(w).Encode(tasks)
+}
+
 func CreateTaskForUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	jwtClaims, ok := r.Context().Value(model.ContextKey("payload")).(jwt.MapClaims)
