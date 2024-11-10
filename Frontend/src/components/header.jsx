@@ -4,7 +4,7 @@ import FemaleAvatar from "../assets/female-avatar.jpg";
 
 export default function Header({ userDetails }) {
   return (
-    <header className="w-full flex items-center justify-between py-4 px-8 sm:px-12 bg-white border-b border-gray-200 shadow-md">
+    <header className="w-full flex flex-wrap items-center justify-between py-4 px-8 sm:px-12 bg-white border-b border-gray-200 shadow-md">
       <div className="flex items-center space-x-4">
         <a href="/" className="text-3xl font-extrabold text-blue-600">
           Todoz
