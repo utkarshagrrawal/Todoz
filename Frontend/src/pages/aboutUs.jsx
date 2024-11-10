@@ -75,7 +75,7 @@ export default function AboutUs() {
             out, and we’d be happy to chat with you.
           </p>
           <Link
-            to="/contact"
+            to="/contact-us"
             className="bg-white text-blue-600 font-semibold text-lg px-6 py-3 rounded-full shadow hover:bg-gray-100 transition"
           >
             Contact Us
