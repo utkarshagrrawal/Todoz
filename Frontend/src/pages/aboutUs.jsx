@@ -82,7 +82,7 @@ export default function AboutUs() {
           </Link>
         </section>
 
-        <section className="w-full max-w-4xl mx-auto text-center py-12 bg-gray-50 rounded-lg shadow-md mt-8 mb-16">
+        <section className="w-full max-w-4xl mx-auto text-center p-8 bg-gray-50 rounded-lg shadow-md mt-8 mb-16">
           <h3 className="text-2xl font-semibold text-gray-800 mb-4">
             Notes & Extra Information
           </h3>
@@ -91,7 +91,7 @@ export default function AboutUs() {
             occasionally take up to 2 minutes to load due to server spin-up
             times.
           </p>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-4">
             Website logo attribution:
             <a
               href="https://www.flaticon.com/free-icons/todo"
@@ -100,8 +100,14 @@ export default function AboutUs() {
               rel="noopener noreferrer"
               className="text-blue-500 hover:underline"
             >
+              {" "}
               Todo icons created by Freepik - Flaticon
             </a>
+          </p>
+          <p className="text-gray-600">
+            This website is a sample project created for educational purposes,
+            including learning and practicing development skills. It is not
+            intended for commercial use.
           </p>
         </section>
       </div>
