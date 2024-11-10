@@ -37,7 +37,7 @@ func GetNonCompletedTasks(email string, page int) ([]model.Tasks, error) {
 	findOptions := options.Find()
 	findOptions.SetSkip(skip)
 	findOptions.SetLimit(20)
-	findOptions.SetSort(bson.D{{Key: "created_at", Value: 1}, {Key: "priority", Value: -1}})
+	findOptions.SetSort(bson.D{{Key: "priority", Value: -1}, {Key: "created_at", Value: 1}})
 	cur, err := db.TasksCollection.Find(context.TODO(), bson.D{{Key: "user_email", Value: email}, {Key: "is_completed", Value: false}}, findOptions)
 	if err != nil {
 		return []model.Tasks{}, err
@@ -59,7 +59,7 @@ func GetCompletedTasks(email string, page int) ([]model.Tasks, error) {
 	findOptions := options.Find()
 	findOptions.SetLimit(20)
 	findOptions.SetSkip(skip)
-	findOptions.SetSort(bson.D{{Key: "created_at", Value: 1}, {Key: "priority", Value: -1}})
+	findOptions.SetSort(bson.D{{Key: "priority", Value: -1}, {Key: "created_at", Value: 1}})
 	var tasks []model.Tasks
 	cur, err := db.TasksCollection.Find(context.TODO(), bson.D{{Key: "user_email", Value: email}, {Key: "is_completed", Value: true}}, findOptions)
 	if err != nil {
@@ -94,4 +94,12 @@ func UpdateTaskDetails(t *model.Tasks) string {
 		return "Error while updating the task"
 	}
 	return "Task details updated"
+}
+
+func DeleteTask(id bson.ObjectID) string {
+	_, err := db.TasksCollection.DeleteOne(context.TODO(), bson.M{"_id": id})
+	if err != nil {
+		return "Error while deleting the task"
+	}
+	return "Task deleted successfully"
 }

@@ -17,8 +17,9 @@ type User struct {
 }
 
 type UserLogin struct {
-	Email    string `bson:"email" json:"email"`
-	Password string `bson:"password" json:"password"`
+	Email      string `bson:"email" json:"email"`
+	Password   string `bson:"password" json:"password"`
+	RememberMe bool   `bson:"remember_me" json:"remember_me"`
 }
 
 type UserResponse struct {

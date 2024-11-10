@@ -40,10 +40,18 @@ func LoginUser(u *model.UserLogin) (string, string, error) {
 	if err != nil {
 		return "", "Invalid password", err
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": u.Email,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(),
-	})
+	var token *jwt.Token
+	if u.RememberMe {
+		token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+			"email": u.Email,
+			"exp":   time.Now().Add(time.Hour * 24 * 7).Unix(),
+		})
+	} else {
+		token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+			"email": u.Email,
+			"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		})
+	}
 	tokenStr, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
 		return "", "Error signing token", err

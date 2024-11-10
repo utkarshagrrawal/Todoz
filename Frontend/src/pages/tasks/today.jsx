@@ -5,9 +5,9 @@ import {
   LoadingNotify,
   SuccessNotify,
 } from "../../components/toast";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { useEffect, useRef, useState } from "react";
+import DeleteIcon from "../../components/icons/trash";
+import "./datepicker.css";
 
 export default function TodayTasks() {
   const [taskData, setTaskData] = useState({
@@ -18,6 +18,8 @@ export default function TodayTasks() {
   const [tasks, setTasks] = useState([]);
   const [page, setPage] = useState(1);
   const scroll = useRef(0);
+  const [deletePopup, setDeletePopup] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState({});
 
   useEffect(() => {
     const observer = () => {
@@ -47,7 +49,7 @@ export default function TodayTasks() {
       });
   }, [page]);
 
-  const handleNewTaskChange = (e) => {
+  const handleTaskDetails = (e) => {
     setTaskData((prev) => ({
       ...prev,
       [e.target.name]:
@@ -55,13 +57,9 @@ export default function TodayTasks() {
     }));
   };
 
-  const handleNewTaskSubmit = () => {
+  const handleSubmit = () => {
     if (!taskData.description || taskData.description.trim() === "") {
       ErrorNotify("Task description is required");
-      return;
-    }
-    if (!taskData.priority) {
-      ErrorNotify("Task priority is required");
       return;
     }
     const toastId = LoadingNotify("Adding new task...");
@@ -97,13 +95,9 @@ export default function TodayTasks() {
       });
   };
 
-  const handleTaskEdit = (task) => {
+  const handleUpdate = (task) => {
     if (!task.description || task.description.trim() === "") {
       ErrorNotify("Task description is required");
-      return;
-    }
-    if (!task.priority) {
-      ErrorNotify("Task priority is required");
       return;
     }
     if (!task.deadline) {
@@ -134,8 +128,65 @@ export default function TodayTasks() {
       });
   };
 
+  const handleDelete = () => {
+    if (!taskToDelete._id) {
+      ErrorNotify("Please refresh the page and try again");
+      return;
+    }
+    const toastId = LoadingNotify("Deleting task...");
+    axios
+      .delete(
+        import.meta.env.VITE_API_URL +
+          "/api/tasks/delete?id=" +
+          taskToDelete._id,
+        {
+          withCredentials: true,
+        }
+      )
+      .then((res) => {
+        if (res.data === "Task deleted successfully") {
+          setTasks((prev) => prev.filter((t) => t._id !== taskToDelete._id));
+          SuccessNotify(res.data);
+        } else {
+          ErrorNotify(res.data);
+        }
+      })
+      .catch((err) => {
+        ErrorNotify(err.response?.data || "Failed to delete task");
+      })
+      .finally(() => {
+        DismissToast(toastId);
+        setDeletePopup(false);
+      });
+  };
+
   return (
     <section className="w-full min-h-screen ml-16 p-6 bg-gray-950">
+      <div
+        className={`fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md z-50 flex justify-center items-center ${
+          !deletePopup && "hidden"
+        }`}
+      >
+        <div className="bg-white p-8 rounded-lg shadow-2xl transform transition-all duration-300 ease-in-out max-w-sm w-full">
+          <div className="text-gray-900 font-semibold text-2xl mb-6 text-center">
+            Are you sure you want to delete this task?
+          </div>
+          <div className="flex justify-center space-x-6">
+            <button
+              className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium shadow-sm"
+              onClick={handleDelete}
+            >
+              Yes
+            </button>
+            <button
+              className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors duration-200 font-medium shadow-sm"
+              onClick={() => setDeletePopup(false)}
+            >
+              No
+            </button>
+          </div>
+        </div>
+      </div>
       <div className="text-center items-center mb-8 text-white font-bold text-4xl">
         Today's Tasks
       </div>
@@ -157,7 +208,7 @@ export default function TodayTasks() {
                     )
                   );
                   task.is_completed = e.target.checked;
-                  handleTaskEdit(task);
+                  handleUpdate(task);
                 }}
               />
               <input
@@ -178,7 +229,7 @@ export default function TodayTasks() {
                     )
                   )
                 }
-                onKeyDown={(e) => e.key === "Enter" && handleTaskEdit(task)}
+                onKeyDown={(e) => e.key === "Enter" && handleUpdate(task)}
               />
               <select
                 name="priority"
@@ -192,7 +243,7 @@ export default function TodayTasks() {
                     )
                   );
                   task.priority = e.target.value;
-                  handleTaskEdit(task);
+                  handleUpdate(task);
                 }}
                 className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
@@ -200,24 +251,32 @@ export default function TodayTasks() {
                 <option value="1">Medium</option>
                 <option value="2">High</option>
               </select>
-              <DatePicker
-                selected={task.deadline}
-                showMonthDropdown
-                showYearDropdown
-                dropdownMode="select"
-                minDate={new Date()}
-                dateFormat={"dd/MMM/yyyy"}
-                onChange={(date) => {
+              <input
+                type="date"
+                value={new Date(task.deadline).toISOString().split("T")[0]}
+                min={new Date().toISOString().split("T")[0]}
+                onChange={(e) => {
                   setTasks((prev) =>
                     prev.map((t) =>
-                      t._id === task._id ? { ...t, deadline: date } : t
+                      t._id === task._id
+                        ? { ...t, deadline: e.target.value }
+                        : t
                     )
                   );
-                  task.deadline = new Date(date).toISOString();
-                  handleTaskEdit(task);
+                  task.deadline = new Date(e.target.value).toISOString();
+                  handleUpdate(task);
                 }}
-                className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 max-w-36 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               />
+              <button
+                className="border border-gray-600 bg-transparent text-white font-medium p-2 rounded-lg shadow-md hover:bg-red-700 transition flex items-center"
+                onClick={() => {
+                  setDeletePopup(true);
+                  setTaskToDelete(task);
+                }}
+              >
+                <DeleteIcon className="text-white w-5 h-5" />
+              </button>
             </div>
           ))}
         <div className="flex items-center space-x-4">
@@ -225,21 +284,21 @@ export default function TodayTasks() {
             type="checkbox"
             name="completed"
             value={taskData.completed}
-            onChange={handleNewTaskChange}
+            onChange={handleTaskDetails}
             className="size-7 text-blue-500 border-gray-500 rounded-full transition-all"
           />
           <input
             className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             name="description"
             value={taskData.description}
-            onChange={handleNewTaskChange}
-            onKeyDown={(e) => e.key === "Enter" && handleNewTaskSubmit()}
+            onChange={handleTaskDetails}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             placeholder="Add a new task..."
           />
           <select
             name="priority"
             value={taskData.priority}
-            onChange={handleNewTaskChange}
+            onChange={handleTaskDetails}
             className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           >
             <option value="0">Low</option>

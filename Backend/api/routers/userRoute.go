@@ -28,6 +28,7 @@ func UserRouter() *mux.Router {
 	r.Handle("/api/tasks/completed", middleware.VerifyToken(http.HandlerFunc(handler.GetCompletedUserTasks))).Methods("GET", "OPTIONS")
 	r.Handle("/api/tasks/create", middleware.VerifyToken(http.HandlerFunc(handler.CreateTaskForUser))).Methods("POST", "OPTIONS")
 	r.Handle("/api/tasks/update", middleware.VerifyToken(http.HandlerFunc(handler.UpdateUserTaskDetails))).Methods("PUT", "OPTIONS")
+	r.Handle("/api/tasks/delete", middleware.VerifyToken(http.HandlerFunc(handler.DeleteTaskHandler))).Methods("DELETE", "OPTIONS")
 
 	return r
 }

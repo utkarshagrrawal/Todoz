@@ -9,6 +9,7 @@ import (
 	model "todolist/models"
 
 	"github.com/golang-jwt/jwt/v5"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -202,6 +203,30 @@ func UpdateUserTaskDetails(w http.ResponseWriter, r *http.Request) {
 	}
 	msg := service.UpdateTaskDetails(&task)
 	if msg != "Task details updated" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+	json.NewEncoder(w).Encode(msg)
+}
+
+func DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	values := r.URL.Query()
+	taskId := values.Get("id")
+	if taskId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error while getting the task id")
+		return
+	}
+	id, err := bson.ObjectIDFromHex(taskId)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error while getting the task id")
+		return
+	}
+	msg := service.DeleteTask(id)
+	if msg != "Task deleted successfully" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(msg)
 		return

@@ -7,6 +7,7 @@ export default function Login() {
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
+    remember_me: false,
   });
   const [loading, setLoading] = useState(false);
   const searchParams = new URLSearchParams(window.location.search);
@@ -34,7 +35,8 @@ export default function Login() {
   const handleChange = (e) => {
     setLoginData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.type === "checkbox" ? e.target.checked : e.target.value,
     }));
   };
 
@@ -42,19 +44,9 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     axios
-      .post(
-        import.meta.env.VITE_API_URL + "/api/user/login",
-        {
-          email: loginData.email,
-          password: loginData.password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      )
+      .post(import.meta.env.VITE_API_URL + "/api/user/login", loginData, {
+        withCredentials: true,
+      })
       .then((res) => {
         if (res.data == "Login successfull") {
           SuccessNotify(res.data);
@@ -123,6 +115,9 @@ export default function Login() {
               <input
                 type="checkbox"
                 className="mr-2 rounded border-gray-300 text-blue-500 focus:ring-0"
+                name="remember_me"
+                checked={loginData.remember_me}
+                onChange={handleChange}
               />
               Remember me
             </label>
