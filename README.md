@@ -10,7 +10,7 @@
       <li><strong>User Registration and Login</strong>: Secure authentication system with session management.</li>
       <li><strong>Task Management</strong>: Create, read, update, and delete tasks.</li>
       <li><strong>Prioritization</strong>: Organize tasks by priority as needed.</li>
-      <li><strong>Due Dates and Reminders</strong>: Set due dates and receive reminders.</li>
+      <li><strong>Due Dates</strong>: Set due dates</li>
     </ul>
   </div>
 
