@@ -38,7 +38,7 @@ export default function ContactUs() {
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
               Send Us a Message
             </h2>
-            <form method="POST" className="space-y-6">
+            <form className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Your Name
