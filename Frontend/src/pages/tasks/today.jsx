@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from "react";
 export default function TodayTasks() {
   const [taskData, setTaskData] = useState({
     description: "",
-    priority: "low",
+    priority: "0",
     completed: false,
   });
   const [tasks, setTasks] = useState([]);
@@ -69,6 +69,7 @@ export default function TodayTasks() {
     deadline.setHours(23, 59, 59, 999);
     taskData.deadline = deadline;
     taskData.status = taskData.completed ? "completed" : "pending";
+    taskData.priority = parseInt(taskData.priority);
     axios
       .post(import.meta.env.VITE_API_URL + "/api/tasks/create", taskData, {
         withCredentials: true,
@@ -78,7 +79,7 @@ export default function TodayTasks() {
           setTasks((prev) => [...prev, taskData]);
           setTaskData({
             description: "",
-            priority: "low",
+            priority: "0",
             completed: false,
           });
           SuccessNotify(res.data);
@@ -96,6 +97,7 @@ export default function TodayTasks() {
 
   const handleTaskEdit = (task) => {
     const toastId = LoadingNotify("Updating task...");
+    task.priority = parseInt(task.priority);
     axios
       .put(import.meta.env.VITE_API_URL + "/api/tasks/update", task, {
         withCredentials: true,
@@ -121,7 +123,8 @@ export default function TodayTasks() {
         Today's Tasks
       </div>
       <div className="flex flex-col space-y-4">
-        {tasks.length > 0 &&
+        {Array.isArray(tasks) &&
+          tasks.length > 0 &&
           tasks.map((task, i) => (
             <div key={i} className="flex items-center space-x-4">
               <input
@@ -176,9 +179,9 @@ export default function TodayTasks() {
                 }}
                 className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="0">Low</option>
+                <option value="1">Medium</option>
+                <option value="2">High</option>
               </select>
               <DatePicker
                 selected={task.deadline}
@@ -222,9 +225,9 @@ export default function TodayTasks() {
             onChange={handleNewTaskChange}
             className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            <option value="0">Low</option>
+            <option value="1">Medium</option>
+            <option value="2">High</option>
           </select>
         </div>
       </div>

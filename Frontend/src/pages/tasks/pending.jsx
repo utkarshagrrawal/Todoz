@@ -7,7 +7,7 @@ import { ErrorNotify, SuccessNotify } from "../../components/toast";
 export default function NonCompletedTasks() {
   const [taskData, setTaskData] = useState({
     description: "",
-    priority: "low",
+    priority: "0",
     completed: false,
     deadline: new Date(),
   });
@@ -77,6 +77,7 @@ export default function NonCompletedTasks() {
       return;
     }
     taskData.deadline = new Date(taskData.deadline).toISOString();
+    taskData.priority = parseInt(taskData.priority);
     axios
       .post(import.meta.env.VITE_API_URL + "/api/tasks/create", taskData, {
         withCredentials: true,
@@ -87,7 +88,7 @@ export default function NonCompletedTasks() {
           setTasks((prev) => [...prev, taskData]);
           setTaskData({
             description: "",
-            priority: "low",
+            priority: "0",
             completed: false,
             deadline: new Date(),
           });
@@ -114,6 +115,7 @@ export default function NonCompletedTasks() {
       return;
     }
     task.deadline = new Date(task.deadline).toISOString();
+    task.priority = parseInt(task.priority);
     axios
       .put(import.meta.env.VITE_API_URL + "/api/tasks/update", task, {
         withCredentials: true,
@@ -191,9 +193,9 @@ export default function NonCompletedTasks() {
                 }}
                 className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="0">Low</option>
+                <option value="1">Medium</option>
+                <option value="2">High</option>
               </select>
               <DatePicker
                 selected={task.deadline}
@@ -237,9 +239,9 @@ export default function NonCompletedTasks() {
             onChange={handleNewTaskChange}
             className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            <option value="0">Low</option>
+            <option value="1">Medium</option>
+            <option value="2">High</option>
           </select>
           <DatePicker
             selected={taskData.deadline}

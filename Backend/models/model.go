@@ -44,7 +44,7 @@ type Tasks struct {
 	CreatedAt   time.Time     `bson:"created_at" json:"created_at"`
 	Deadline    time.Time     `bson:"deadline" json:"deadline"`
 	IsCompleted bool          `bson:"is_completed" json:"is_completed"`
-	Priority    string        `bson:"priority" json:"priority"`
+	Priority    int           `bson:"priority" json:"priority"`
 }
 
 type ContextKey string
@@ -57,7 +57,7 @@ func (u *User) IsValid() bool {
 }
 
 func (t *Tasks) IsValid() bool {
-	if t.UserEmail == "" || t.Description == "" || t.Status == "" || t.Priority == "" {
+	if t.UserEmail == "" || t.Description == "" || t.Status == "" {
 		return false
 	}
 	return true

@@ -35,17 +35,16 @@ func GetTodayPendingUserTasks(w http.ResponseWriter, r *http.Request) {
 	}
 	num, err := strconv.Atoi(page)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode("Error while retrieving the page number")
 		return
 	}
 	tasks, err := service.GetTodayPendingTasks(email, num)
 	if err == mongo.ErrNoDocuments {
-		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode("No tasks created for the user")
 		return
 	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err)
 		return
 	}

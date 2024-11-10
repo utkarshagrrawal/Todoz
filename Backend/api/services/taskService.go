@@ -15,7 +15,7 @@ func GetTodayPendingTasks(email string, page int) ([]model.Tasks, error) {
 	findOptions := options.Find()
 	findOptions.SetLimit(20)
 	findOptions.SetSkip(skip)
-	findOptions.SetSort(bson.D{{Key: "created_at", Value: 1}})
+	findOptions.SetSort(bson.D{{Key: "priority", Value: -1}, {Key: "created_at", Value: 1}})
 	cur, err := db.TasksCollection.Find(context.TODO(), bson.D{{Key: "user_email", Value: email}, {Key: "is_completed", Value: false}, {Key: "deadline", Value: bson.D{{Key: "$lt", Value: time.Now().AddDate(0, 0, 1)}}}}, findOptions)
 	var tasks []model.Tasks
 	if err != nil {
@@ -37,7 +37,7 @@ func GetNonCompletedTasks(email string, page int) ([]model.Tasks, error) {
 	findOptions := options.Find()
 	findOptions.SetSkip(skip)
 	findOptions.SetLimit(20)
-	findOptions.SetSort(bson.M{"created_at": 1})
+	findOptions.SetSort(bson.M{"created_at": 1, "priority": -1})
 	cur, err := db.TasksCollection.Find(context.TODO(), bson.D{{Key: "user_email", Value: email}, {Key: "is_completed", Value: false}}, findOptions)
 	if err != nil {
 		return []model.Tasks{}, err
@@ -59,7 +59,7 @@ func GetCompletedTasks(email string, page int) ([]model.Tasks, error) {
 	findOptions := options.Find()
 	findOptions.SetLimit(20)
 	findOptions.SetSkip(skip)
-	findOptions.SetSort(bson.D{{Key: "created_at", Value: 1}})
+	findOptions.SetSort(bson.D{{Key: "created_at", Value: 1}, {Key: "priority", Value: -1}})
 	var tasks []model.Tasks
 	cur, err := db.TasksCollection.Find(context.TODO(), bson.D{{Key: "user_email", Value: email}, {Key: "is_completed", Value: true}}, findOptions)
 	if err != nil {

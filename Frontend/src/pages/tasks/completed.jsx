@@ -62,6 +62,7 @@ export default function Completed() {
 
   const handleTaskEdit = (task) => {
     const toastId = LoadingNotify("Updating task");
+    task.priority = parseInt(task.priority);
     axios
       .put(import.meta.env.VITE_API_URL + "/api/tasks/update", task, {
         headers: {
@@ -145,9 +146,9 @@ export default function Completed() {
                 }}
                 className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="0">Low</option>
+                <option value="1">Medium</option>
+                <option value="2">High</option>
               </select>
               <DatePicker
                 selected={task.deadline}
