@@ -47,6 +47,12 @@ type Tasks struct {
 	Priority    int           `bson:"priority" json:"priority"`
 }
 
+type ContactForm struct {
+	Name    string `bson:"name" json:"name"`
+	Email   string `bson:"email" json:"email"`
+	Message string `bson:"message" json:"message"`
+}
+
 type ContextKey string
 
 func (u *User) IsValid() bool {

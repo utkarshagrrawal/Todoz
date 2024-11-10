@@ -87,10 +87,11 @@ export default function Signup() {
         } else {
           ErrorNotify(res.data);
         }
-        setLoading(false);
       })
       .catch((err) => {
         ErrorNotify(err.response?.data || "Error creating account!");
+      })
+      .finally(() => {
         setLoading(false);
       });
   };

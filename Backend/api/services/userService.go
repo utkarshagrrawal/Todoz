@@ -137,3 +137,11 @@ func VerifyUser(email string) (string, error) {
 	}
 	return "User verified successfully", nil
 }
+
+func InsertContactDetails(c *model.ContactForm) error {
+	_, err := db.ContactCollection.InsertOne(context.TODO(), c)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -85,7 +85,9 @@ export default function NonCompletedTasks() {
       .then((res) => {
         if (res.data === "Task created successfully") {
           SuccessNotify(res.data);
-          setTasks((prev) => [...prev, taskData]);
+          if (!taskData.completed) {
+            setTasks((prev) => [...prev, taskData]);
+          }
           setTaskData({
             description: "",
             priority: "0",
@@ -123,6 +125,9 @@ export default function NonCompletedTasks() {
       .then((res) => {
         if (res.data === "Task details updated") {
           SuccessNotify(res.data);
+          if (task.is_completed) {
+            setTasks((prev) => prev.filter((t) => t._id !== task._id));
+          }
         } else {
           ErrorNotify(res.data);
         }

@@ -210,3 +210,21 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &cookie)
 	json.NewEncoder(w).Encode("Logged out successfully")
 }
+
+func FillContactUs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var details model.ContactForm
+	err := json.NewDecoder(r.Body).Decode(&details)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error while getting contact details")
+		return
+	}
+	err = service.InsertContactDetails(&details)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Error while registering contact details")
+		return
+	}
+	json.NewEncoder(w).Encode("Thanks for filling the form!")
+}

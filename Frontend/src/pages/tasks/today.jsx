@@ -76,7 +76,9 @@ export default function TodayTasks() {
       })
       .then((res) => {
         if (res.data === "Task created successfully") {
-          setTasks((prev) => [...prev, taskData]);
+          if (!taskData.completed) {
+            setTasks((prev) => [...prev, taskData]);
+          }
           setTaskData({
             description: "",
             priority: "0",
@@ -96,6 +98,18 @@ export default function TodayTasks() {
   };
 
   const handleTaskEdit = (task) => {
+    if (!task.description || task.description.trim() === "") {
+      ErrorNotify("Task description is required");
+      return;
+    }
+    if (!task.priority) {
+      ErrorNotify("Task priority is required");
+      return;
+    }
+    if (!task.deadline) {
+      ErrorNotify("Task deadline is required");
+      return;
+    }
     const toastId = LoadingNotify("Updating task...");
     task.priority = parseInt(task.priority);
     axios
@@ -105,6 +119,9 @@ export default function TodayTasks() {
       .then((res) => {
         if (res.data === "Task details updated") {
           SuccessNotify(res.data);
+          if (task.is_completed) {
+            setTasks((prev) => prev.filter((t) => t._id !== task._id));
+          }
         } else {
           ErrorNotify(res.data);
         }

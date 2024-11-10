@@ -2,11 +2,19 @@ import { useEffect, useState } from "react";
 import Footer from "../components/footer";
 import Header from "../components/header";
 import axios from "axios";
+import { ErrorNotify, SuccessNotify } from "../components/toast";
 
 export default function ContactUs() {
   const [userDetails, setUserDetails] = useState({});
+  const [details, setDetails] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(import.meta.env.VITE_API_URL + "/api/user/details", {
         withCredentials: true,
@@ -16,8 +24,34 @@ export default function ContactUs() {
       })
       .catch((err) => {
         setUserDetails({});
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    axios
+      .post(import.meta.env.VITE_API_URL + "/api/user/contact-us", details)
+      .then((res) => {
+        SuccessNotify(res.data);
+        setDetails({
+          name: "",
+          email: "",
+          message: "",
+        });
+      })
+      .catch((err) => {
+        ErrorNotify(err.response?.data || "An error occurred");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
     <>
@@ -38,7 +72,7 @@ export default function ContactUs() {
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
               Send Us a Message
             </h2>
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Your Name
@@ -48,6 +82,10 @@ export default function ContactUs() {
                   name="name"
                   required
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={details.name}
+                  onChange={(e) =>
+                    setDetails((prev) => ({ ...prev, name: e.target.value }))
+                  }
                 />
               </div>
               <div>
@@ -59,6 +97,10 @@ export default function ContactUs() {
                   name="email"
                   required
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={details.email}
+                  onChange={(e) =>
+                    setDetails((prev) => ({ ...prev, email: e.target.value }))
+                  }
                 />
               </div>
               <div>
@@ -70,6 +112,10 @@ export default function ContactUs() {
                   rows="4"
                   required
                   className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={details.message}
+                  onChange={(e) =>
+                    setDetails((prev) => ({ ...prev, message: e.target.value }))
+                  }
                 ></textarea>
               </div>
               <button

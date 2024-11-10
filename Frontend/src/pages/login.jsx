@@ -66,12 +66,13 @@ export default function Login() {
         } else {
           ErrorNotify(res.data);
         }
-        setLoading(false);
       })
       .catch((err) => {
         ErrorNotify(
           err.response?.data || "An error occurred. Please try again later."
         );
+      })
+      .finally(() => {
         setLoading(false);
       });
   };

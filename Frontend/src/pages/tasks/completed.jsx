@@ -73,6 +73,9 @@ export default function Completed() {
       .then((res) => {
         if (res.data === "Task details updated") {
           SuccessNotify(res.data);
+          if (!task.is_completed) {
+            setTasks((prev) => prev.filter((t) => t._id !== task._id));
+          }
           return;
         }
         ErrorNotify(res.data);

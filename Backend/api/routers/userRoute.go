@@ -21,6 +21,7 @@ func UserRouter() *mux.Router {
 	r.Handle("/api/user/details", middleware.VerifyToken(http.HandlerFunc(handler.GetUserDetails))).Methods("GET", "OPTIONS")
 	r.Handle("/api/user/update-details", middleware.VerifyToken(http.HandlerFunc(handler.UpdateUserDetailsHandler))).Methods("PUT", "OPTIONS")
 	r.Handle("/api/user/change-password", middleware.VerifyToken(http.HandlerFunc(handler.UpdateUserPasswordHandler))).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/user/contact-us", handler.FillContactUs).Methods("POST", "OPTIONS")
 
 	r.Handle("/api/tasks/today", middleware.VerifyToken(http.HandlerFunc(handler.GetTodayPendingUserTasks))).Methods("GET", "OPTIONS")
 	r.Handle("/api/tasks/non-completed", middleware.VerifyToken(http.HandlerFunc(handler.GetNonCompletedUserTasks))).Methods("GET", "OPTIONS")
