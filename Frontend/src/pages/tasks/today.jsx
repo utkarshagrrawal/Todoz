@@ -122,8 +122,8 @@ export default function TodayTasks() {
       </div>
       <div className="flex flex-col space-y-4">
         {tasks.length > 0 &&
-          tasks.map((task) => (
-            <div key={task._id} className="flex items-center space-x-4">
+          tasks.map((task, i) => (
+            <div key={i} className="flex items-center space-x-4">
               <input
                 type="checkbox"
                 className="size-7 text-blue-500 border-gray-500 rounded-full transition-all"

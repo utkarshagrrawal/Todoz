@@ -29,7 +29,7 @@ export default function ChangePassword() {
         setUserDetails(res.data);
       })
       .catch((err) => {
-        if (err.status === 401) {
+        if (err.status === 400 || err.status === 401) {
           window.location.href =
             "/login?redirect=" + encodeURIComponent("/change-password");
         }
@@ -121,7 +121,7 @@ export default function ChangePassword() {
           </div>
 
           <ul
-            className={`list-disc list-outside text-sm text-gray-500 ${
+            className={`text-sm text-gray-500 space-y-2 list-outside ${
               score === "" && "hidden"
             }`}
           >

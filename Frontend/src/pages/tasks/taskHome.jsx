@@ -12,6 +12,14 @@ export default function TaskHome() {
   const [selectedTab, setSelectedTab] = useState(section || "home");
 
   useEffect(() => {
+    if (["home", "not-completed", "completed"].includes(section)) {
+      setSelectedTab(section);
+    } else {
+      window.location.href = "/tasks/home";
+    }
+  }, [section]);
+
+  useEffect(() => {
     axios
       .get(import.meta.env.VITE_API_URL + "/api/user/details", {
         withCredentials: true,

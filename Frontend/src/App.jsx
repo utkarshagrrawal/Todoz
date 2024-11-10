@@ -9,6 +9,7 @@ import AboutUs from "./pages/aboutUs";
 import TaskHome from "./pages/tasks/taskHome";
 import Profile from "./pages/profile";
 import ChangePassword from "./pages/changePwd";
+import NotFound from "./pages/notFound";
 
 function App() {
   const { toasts } = useToasterStore();
@@ -33,6 +34,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/tasks" element={<Navigate to={"/tasks/home"} />} />
         <Route path="/tasks/:section" element={<TaskHome />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

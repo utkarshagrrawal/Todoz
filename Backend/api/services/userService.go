@@ -99,6 +99,12 @@ func UpdateUserPassword(u *model.ChangeCredentials) (string, error) {
 
 func UpdateUserDetails(u *model.User, email string) string {
 	updateQuery := bson.D{{Key: "$set", Value: bson.D{{Key: "name", Value: u.Name}, {Key: "email", Value: u.Email}, {Key: "gender", Value: u.Gender}, {Key: "phone", Value: u.Phone}}}}
+	if u.Email != email {
+		singleResult := db.UserCollection.FindOne(context.TODO(), bson.M{"email": u.Email})
+		if singleResult.Err() != mongo.ErrNoDocuments {
+			return "Email already in use"
+		}
+	}
 	_, err := db.UserCollection.UpdateOne(context.Background(), bson.D{{Key: "email", Value: email}}, updateQuery)
 	if err != nil {
 		return "Error updating user details"

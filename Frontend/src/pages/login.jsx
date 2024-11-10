@@ -141,7 +141,13 @@ export default function Login() {
         <p className="text-center text-gray-500">
           Don't have an account?
           <Link
-            to="/signup"
+            to={
+              searchParams.get("redirect")
+                ? `/signup?redirect=${encodeURIComponent(
+                    searchParams.get("redirect")
+                  )}`
+                : `/signup`
+            }
             className="text-blue-500 font-medium hover:underline ml-1"
           >
             Sign up

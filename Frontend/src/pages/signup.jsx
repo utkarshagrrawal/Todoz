@@ -2,6 +2,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ErrorNotify, SuccessNotify } from "../components/toast";
+import WarningIcon from "../components/icons/warning";
+import CheckIcon from "../components/icons/check";
 
 export default function Signup() {
   const [signupData, setSignupData] = useState({
@@ -13,6 +15,8 @@ export default function Signup() {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [score, setScore] = useState("");
+  const searchParams = new URLSearchParams(window.location.search);
 
   useEffect(() => {
     setLoading(true);
@@ -38,11 +42,28 @@ export default function Signup() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+    if (e.target.name === "password") {
+      const password = e.target.value;
+      let tempScore = "";
+      if (password.match(/[a-z]/)) tempScore += "L";
+      if (password.match(/[A-Z]/)) tempScore += "U";
+      if (password.match(/[0-9]/)) tempScore += "N";
+      if (password.match(/.[!,@,#,$,%,^,&,*,?,_,~,-,(,)]/)) tempScore += "S";
+      if (password.length > 12 && password.length < 48) tempScore += "M";
+      setScore(tempScore);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (score.length !== 5) {
+      ErrorNotify("Password does not meet the requirements");
+      return;
+    }
+
     setLoading(true);
+
     axios
       .post(
         import.meta.env.VITE_API_URL + "/api/user/create",
@@ -57,7 +78,12 @@ export default function Signup() {
       .then((res) => {
         if (res.data == "Account created successfully") {
           SuccessNotify(res.data);
-          navigate("/login");
+          if (searchParams.get("redirect"))
+            navigate(
+              "/login?redirect=" +
+                encodeURIComponent(searchParams.get("redirect"))
+            );
+          else navigate("/login");
         } else {
           ErrorNotify(res.data);
         }
@@ -157,6 +183,53 @@ export default function Signup() {
             />
           </div>
 
+          <ul
+            className={`text-sm text-gray-500 space-y-2 list-outside ${
+              score === "" && "hidden"
+            }`}
+          >
+            <li className="flex items-center">
+              {score.includes("L") ? (
+                <CheckIcon className="text-green-500 mr-2 size-4" />
+              ) : (
+                <WarningIcon className="text-red-500 mr-2 size-4" />
+              )}
+              At least one lowercase letter
+            </li>
+            <li className="flex items-center">
+              {score.includes("U") ? (
+                <CheckIcon className="text-green-500 mr-2 size-4" />
+              ) : (
+                <WarningIcon className="text-red-500 mr-2 size-4" />
+              )}
+              At least one uppercase letter
+            </li>
+            <li className="flex items-center">
+              {score.includes("N") ? (
+                <CheckIcon className="text-green-500 mr-2 size-4" />
+              ) : (
+                <WarningIcon className="text-red-500 mr-2 size-4" />
+              )}
+              At least one number
+            </li>
+            <li className="flex items-center">
+              {score.includes("S") ? (
+                <CheckIcon className="text-green-500 mr-2 size-4" />
+              ) : (
+                <WarningIcon className="text-red-500 mr-2 size-4" />
+              )}
+              At least one special character
+            </li>
+            <li className="flex items-center">
+              {score.includes("M") ? (
+                <CheckIcon className="text-green-500 mr-2 size-4" />
+              ) : (
+                <WarningIcon className="text-red-500 mr-2 size-4" />
+              )}
+              Password length between 12 and 48 characters
+            </li>
+          </ul>
+
           <button
             type="submit"
             className={`w-full py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md font-semibold shadow-md transition duration-200 ${
@@ -171,7 +244,13 @@ export default function Signup() {
         <p className="text-center text-gray-500">
           Already have an account?
           <Link
-            to="/login"
+            to={
+              searchParams.get("redirect")
+                ? `/login?redirect=${encodeURIComponent(
+                    searchParams.get("redirect")
+                  )}`
+                : `/login`
+            }
             className="text-blue-500 font-medium hover:underline ml-1"
           >
             Login
