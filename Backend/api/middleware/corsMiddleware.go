@@ -9,6 +9,7 @@ import (
 func ApplyCors(next http.Handler) http.Handler {
 	origins := make(map[string]bool)
 	origins["localhost:5173"] = true
+	origins["localhost:5174"] = true
 	origins["todoz-ten.vercel.app"] = true
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
