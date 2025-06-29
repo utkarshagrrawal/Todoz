@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Footer from "../components/footer";
 import Header from "../components/header";
 import axios from "axios";
-import { ErrorNotify, SuccessNotify } from "../components/toast";
 
 export default function ContactUs() {
   const [userDetails, setUserDetails] = useState({});
@@ -12,6 +11,10 @@ export default function ContactUs() {
     message: "",
   });
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({
+    success: false,
+    message: "",
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -38,7 +41,10 @@ export default function ContactUs() {
     axios
       .post(import.meta.env.VITE_API_URL + "/api/user/contact-us", details)
       .then((res) => {
-        SuccessNotify(res.data);
+        setStatus({
+          success: true,
+          message: "Message sent successfully!",
+        });
         setDetails({
           name: "",
           email: "",
@@ -46,7 +52,10 @@ export default function ContactUs() {
         });
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data || "An error occurred");
+        setStatus({
+          success: false,
+          message: err.response?.data || "Failed to send message",
+        });
       })
       .finally(() => {
         setLoading(false);
@@ -72,6 +81,17 @@ export default function ContactUs() {
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
               Send Us a Message
             </h2>
+            {status.message && (
+              <div
+                className={`p-4 mb-4 rounded-lg ${
+                  status.success
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                <p className="text-sm">{status.message}</p>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700">

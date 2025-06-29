@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ErrorNotify, SuccessNotify } from "../components/toast";
 import { useEffect, useState } from "react";
 
 export default function Login() {
@@ -10,6 +9,10 @@ export default function Login() {
     remember_me: false,
   });
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({
+    success: false,
+    message: "",
+  });
   const searchParams = new URLSearchParams(window.location.search);
   const navigate = useNavigate();
 
@@ -23,7 +26,10 @@ export default function Login() {
         if (res.data?.email) {
           navigate("/");
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: false,
+            message: "You are not logged in",
+          });
         }
         setLoading(false);
       })
@@ -49,20 +55,27 @@ export default function Login() {
       })
       .then((res) => {
         if (res.data == "Login successfull") {
-          SuccessNotify(res.data);
+          setStatus({
+            success: true,
+            message: "Login successful!",
+          });
           if (searchParams.get("redirect")) {
             navigate(decodeURIComponent(searchParams.get("redirect")));
           } else {
             navigate("/");
           }
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: false,
+            message: res?.data || "Login failed. Please try again.",
+          });
         }
       })
       .catch((err) => {
-        ErrorNotify(
-          err.response?.data || "An error occurred. Please try again later."
-        );
+        setStatus({
+          success: false,
+          message: err.response?.data || "Login failed. Please try again.",
+        });
       })
       .finally(() => {
         setLoading(false);
@@ -78,6 +91,18 @@ export default function Login() {
         <p className="text-center text-gray-500">
           Welcome back! Please enter your details.
         </p>
+
+        {status.message && (
+          <div
+            className={`p-4 mb-4 rounded-lg ${
+              status.success
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            <p className="text-sm">{status.message}</p>
+          </div>
+        )}
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-2">

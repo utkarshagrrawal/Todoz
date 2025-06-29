@@ -1,11 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import {
-  DismissToast,
-  ErrorNotify,
-  LoadingNotify,
-  SuccessNotify,
-} from "../../components/toast";
 import "./datepicker.css";
 import DeleteIcon from "../../components/icons/trash";
 
@@ -20,6 +14,10 @@ export default function NonCompletedTasks() {
   const [page, setPage] = useState(1);
   const [deletePopup, setDeletePopup] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState({});
+  const [status, setStatus] = useState({
+    success: 0,
+    message: "",
+  });
   const scroll = useRef(0);
 
   useEffect(() => {
@@ -49,7 +47,10 @@ export default function NonCompletedTasks() {
         }
       })
       .catch((err) => {
-        ErrorNotify("Failed to fetch tasks");
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to fetch tasks",
+        });
       });
   }, [page]);
 
@@ -63,11 +64,17 @@ export default function NonCompletedTasks() {
 
   const handleSubmit = () => {
     if (!taskData.description || taskData.description.trim() === "") {
-      ErrorNotify("Task description is required");
+      setStatus({
+        success: 2,
+        message: "Task description is required",
+      });
       return;
     }
     if (!taskData.deadline) {
-      ErrorNotify("Task deadline is required");
+      setStatus({
+        success: 2,
+        message: "Task deadline is required",
+      });
       return;
     }
     taskData.deadline = new Date(taskData.deadline).toISOString();
@@ -78,7 +85,10 @@ export default function NonCompletedTasks() {
       })
       .then((res) => {
         if (res.data === "Task created successfully") {
-          SuccessNotify(res.data);
+          setStatus({
+            success: 0,
+            message: "Task created successfully",
+          });
           if (!taskData.completed) {
             setTasks((prev) => [...prev, taskData]);
           }
@@ -89,21 +99,33 @@ export default function NonCompletedTasks() {
             deadline: new Date(),
           });
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: 2,
+            message: res.data || "Failed to create task",
+          });
         }
       })
       .catch((err) => {
-        ErrorNotify("Failed to create task");
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to create task",
+        });
       });
   };
 
   const handleUpdate = (task) => {
     if (!task.description || task.description.trim() === "") {
-      ErrorNotify("Task description is required");
+      setStatus({
+        success: 2,
+        message: "Task description is required",
+      });
       return;
     }
     if (!task.deadline) {
-      ErrorNotify("Task deadline is required");
+      setStatus({
+        success: 2,
+        message: "Task deadline is required",
+      });
       return;
     }
     task.deadline = new Date(task.deadline).toISOString();
@@ -114,25 +136,40 @@ export default function NonCompletedTasks() {
       })
       .then((res) => {
         if (res.data === "Task details updated") {
-          SuccessNotify(res.data);
+          setStatus({
+            success: 0,
+            message: "Task details updated successfully",
+          });
           if (task.is_completed) {
             setTasks((prev) => prev.filter((t) => t._id !== task._id));
           }
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: 2,
+            message: res.data || "Failed to update task",
+          });
         }
       })
       .catch((err) => {
-        ErrorNotify("Failed to update task");
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to update task",
+        });
       });
   };
 
   const handleDelete = () => {
     if (!taskToDelete._id) {
-      ErrorNotify("Please refresh the page and try again");
+      setStatus({
+        success: 2,
+        message: "No task selected for deletion",
+      });
       return;
     }
-    const toastId = LoadingNotify("Deleting task...");
+    setStatus({
+      success: 1,
+      message: "Deleting task...",
+    });
     axios
       .delete(
         import.meta.env.VITE_API_URL +
@@ -145,16 +182,24 @@ export default function NonCompletedTasks() {
       .then((res) => {
         if (res.data === "Task deleted successfully") {
           setTasks((prev) => prev.filter((t) => t._id !== taskToDelete._id));
-          SuccessNotify(res.data);
+          setStatus({
+            success: 0,
+            message: "Task deleted successfully",
+          });
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: 2,
+            message: res.data || "Failed to delete task",
+          });
         }
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data || "Failed to delete task");
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to delete task",
+        });
       })
       .finally(() => {
-        DismissToast(toastId);
         setDeletePopup(false);
       });
   };
@@ -189,6 +234,19 @@ export default function NonCompletedTasks() {
       <div className="text-center items-center mb-8 text-white font-bold text-4xl">
         All incomplete tasks
       </div>
+      {status.message && (
+        <div
+          className={`p-4 mb-4 rounded-lg ${
+            status.success === 0
+              ? "bg-green-100 text-green-800"
+              : status.success === 1
+              ? "bg-blue-100 text-blue-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          <p className="text-sm">{status.message}</p>
+        </div>
+      )}
       <div className="flex flex-col space-y-4">
         {tasks.length > 0 &&
           tasks.map((task, i) => (

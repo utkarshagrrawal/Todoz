@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import MaleAvatar from "../assets/male-avatar.jpg";
 import FemaleAvatar from "../assets/female-avatar.jpg";
 import { Link } from "react-router-dom";
-import { ErrorNotify, SuccessNotify } from "../components/toast";
 
 export default function Profile() {
   const [userDetails, setUserDetails] = useState({
@@ -11,6 +10,10 @@ export default function Profile() {
     email: "",
     phone: "",
     gender: "",
+  });
+  const [status, setStatus] = useState({
+    success: false,
+    message: "",
   });
 
   useEffect(() => {
@@ -26,7 +29,10 @@ export default function Profile() {
           window.location.href =
             "/login?redirect=" + encodeURIComponent("/profile");
         }
-        ErrorNotify(err.response?.data);
+        setStatus({
+          success: false,
+          message: err.response?.data || "Failed to fetch user details",
+        });
       });
   }, []);
 
@@ -49,7 +55,10 @@ export default function Profile() {
         }
       )
       .then((res) => {
-        SuccessNotify("User details updated successfully");
+        setStatus({
+          success: true,
+          message: "User details updated successfully",
+        });
         if (res.data === "User login details updated successfully") {
           window.location.href =
             "/login?redirect=" + encodeURIComponent("/profile");
@@ -58,7 +67,10 @@ export default function Profile() {
         }
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data);
+        setStatus({
+          success: false,
+          message: err.response?.data || "Failed to update user details",
+        });
       });
   };
 
@@ -75,7 +87,10 @@ export default function Profile() {
         window.location.href = "/login";
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data);
+        setStatus({
+          success: false,
+          message: err.response?.data || "Failed to log out",
+        });
       });
   };
 
@@ -88,6 +103,18 @@ export default function Profile() {
         <h2 className="text-4xl font-bold text-gray-900 text-center mb-6">
           Profile
         </h2>
+
+        {status.message && (
+          <div
+            className={`p-4 mb-4 rounded-lg ${
+              status.success
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            <p className="text-sm">{status.message}</p>
+          </div>
+        )}
 
         <div className="flex flex-col items-center mb-10">
           <div className="relative w-28 h-28 mb-4">

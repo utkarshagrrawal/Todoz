@@ -1,10 +1,4 @@
 import axios from "axios";
-import {
-  DismissToast,
-  ErrorNotify,
-  LoadingNotify,
-  SuccessNotify,
-} from "../../components/toast";
 import { useEffect, useRef, useState } from "react";
 import DeleteIcon from "../../components/icons/trash";
 import "./datepicker.css";
@@ -20,6 +14,10 @@ export default function TodayTasks() {
   const scroll = useRef(0);
   const [deletePopup, setDeletePopup] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState({});
+  const [status, setStatus] = useState({
+    success: 0,
+    message: "",
+  });
 
   useEffect(() => {
     const observer = () => {
@@ -45,7 +43,10 @@ export default function TodayTasks() {
         }
       })
       .catch((err) => {
-        ErrorNotify("Failed to fetch tasks");
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to fetch tasks",
+        });
       });
   }, [page]);
 
@@ -59,10 +60,16 @@ export default function TodayTasks() {
 
   const handleSubmit = () => {
     if (!taskData.description || taskData.description.trim() === "") {
-      ErrorNotify("Task description is required");
+      setStatus({
+        success: 2,
+        message: "Task description is required",
+      });
       return;
     }
-    const toastId = LoadingNotify("Adding new task...");
+    setStatus({
+      success: 1,
+      message: "Adding task...",
+    });
     let deadline = new Date();
     deadline.setHours(23, 59, 59, 999);
     taskData.deadline = deadline;
@@ -82,29 +89,44 @@ export default function TodayTasks() {
             priority: "0",
             completed: false,
           });
-          SuccessNotify(res.data);
+          setStatus({
+            success: 0,
+            message: "Task added successfully",
+          });
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: 2,
+            message: res.data || "Failed to add task",
+          });
         }
       })
       .catch((err) => {
-        ErrorNotify("Failed to add task");
-      })
-      .finally(() => {
-        DismissToast(toastId);
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to add task",
+        });
       });
   };
 
   const handleUpdate = (task) => {
     if (!task.description || task.description.trim() === "") {
-      ErrorNotify("Task description is required");
+      setStatus({
+        success: 2,
+        message: "Task description is required",
+      });
       return;
     }
     if (!task.deadline) {
-      ErrorNotify("Task deadline is required");
+      setStatus({
+        success: 2,
+        message: "Task deadline is required",
+      });
       return;
     }
-    const toastId = LoadingNotify("Updating task...");
+    setStatus({
+      success: 1,
+      message: "Updating task details...",
+    });
     task.priority = parseInt(task.priority);
     axios
       .put(import.meta.env.VITE_API_URL + "/api/tasks/update", task, {
@@ -112,28 +134,40 @@ export default function TodayTasks() {
       })
       .then((res) => {
         if (res.data === "Task details updated") {
-          SuccessNotify(res.data);
+          setStatus({
+            success: 0,
+            message: "Task details updated successfully",
+          });
           if (task.is_completed) {
             setTasks((prev) => prev.filter((t) => t._id !== task._id));
           }
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: 2,
+            message: res.data || "Failed to update task",
+          });
         }
       })
       .catch((err) => {
-        ErrorNotify("Failed to update task");
-      })
-      .finally(() => {
-        DismissToast(toastId);
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to update task",
+        });
       });
   };
 
   const handleDelete = () => {
     if (!taskToDelete._id) {
-      ErrorNotify("Please refresh the page and try again");
+      setStatus({
+        success: 2,
+        message: "No task selected for deletion",
+      });
       return;
     }
-    const toastId = LoadingNotify("Deleting task...");
+    setStatus({
+      success: 1,
+      message: "Deleting task...",
+    });
     axios
       .delete(
         import.meta.env.VITE_API_URL +
@@ -146,16 +180,24 @@ export default function TodayTasks() {
       .then((res) => {
         if (res.data === "Task deleted successfully") {
           setTasks((prev) => prev.filter((t) => t._id !== taskToDelete._id));
-          SuccessNotify(res.data);
+          setStatus({
+            success: 0,
+            message: "Task deleted successfully",
+          });
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: 2,
+            message: res.data || "Failed to delete task",
+          });
         }
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data || "Failed to delete task");
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to delete task",
+        });
       })
       .finally(() => {
-        DismissToast(toastId);
         setDeletePopup(false);
       });
   };
@@ -190,6 +232,19 @@ export default function TodayTasks() {
       <div className="text-center items-center mb-8 text-white font-bold text-4xl">
         Today's Tasks
       </div>
+      {status.message && (
+        <div
+          className={`p-4 mb-4 rounded-lg ${
+            status.success === 0
+              ? "bg-green-100 text-green-800"
+              : status.success === 1
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          <p className="text-sm">{status.message}</p>
+        </div>
+      )}
       <div className="flex flex-col space-y-4">
         {Array.isArray(tasks) &&
           tasks.length > 0 &&

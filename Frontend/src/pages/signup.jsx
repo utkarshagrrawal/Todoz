@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ErrorNotify, SuccessNotify } from "../components/toast";
 import WarningIcon from "../components/icons/warning";
 import CheckIcon from "../components/icons/check";
 
@@ -14,8 +13,12 @@ export default function Signup() {
     gender: "male",
   });
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [status, setStatus] = useState({
+    success: false,
+    message: "",
+  });
   const [score, setScore] = useState("");
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(window.location.search);
 
   useEffect(() => {
@@ -28,7 +31,10 @@ export default function Signup() {
         if (res.data?.email) {
           navigate("/");
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: false,
+            message: res?.data || "You are not logged in",
+          });
         }
         setLoading(false);
       })
@@ -58,7 +64,10 @@ export default function Signup() {
     e.preventDefault();
 
     if (score.length !== 5) {
-      ErrorNotify("Password does not meet the requirements");
+      setStatus({
+        success: false,
+        message: "Password does not meet the required conditions",
+      });
       return;
     }
 
@@ -77,7 +86,10 @@ export default function Signup() {
       )
       .then((res) => {
         if (res.data == "Account created successfully") {
-          SuccessNotify(res.data);
+          setStatus({
+            success: true,
+            message: "Account created successfully",
+          });
           if (searchParams.get("redirect"))
             navigate(
               "/login?redirect=" +
@@ -85,11 +97,17 @@ export default function Signup() {
             );
           else navigate("/login");
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: false,
+            message: res?.data || "Error creating account!",
+          });
         }
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data || "Error creating account!");
+        setStatus({
+          success: false,
+          message: err.response?.data || "Error creating account!",
+        });
       })
       .finally(() => {
         setLoading(false);
@@ -105,6 +123,18 @@ export default function Signup() {
         <p className="text-center text-gray-500">
           Join us and start organizing with Todoz!
         </p>
+
+        {status.message && (
+          <div
+            className={`p-4 mb-4 rounded-lg ${
+              status.success
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            <p className="text-sm">{status.message}</p>
+          </div>
+        )}
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-2">

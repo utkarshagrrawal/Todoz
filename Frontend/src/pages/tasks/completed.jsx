@@ -1,11 +1,5 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import {
-  DismissToast,
-  ErrorNotify,
-  LoadingNotify,
-  SuccessNotify,
-} from "../../components/toast";
 import "./datepicker.css";
 import DeleteIcon from "../../components/icons/trash";
 
@@ -15,6 +9,10 @@ export default function Completed() {
   const [page, setPage] = useState(1);
   const [deletePopup, setDeletePopup] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState({});
+  const [status, setStatus] = useState({
+    success: 0,
+    message: "",
+  });
   const scroll = useRef(0);
 
   useEffect(() => {
@@ -41,7 +39,10 @@ export default function Completed() {
           window.location.href =
             "/login?redirect=" + encodeURIComponent("/tasks/completed");
         }
-        ErrorNotify(err.response?.data);
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to fetch user details",
+        });
       });
   }, []);
 
@@ -58,12 +59,18 @@ export default function Completed() {
         }
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data);
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to fetch tasks",
+        });
       });
   }, [page]);
 
   const handleUpdate = (task) => {
-    const toastId = LoadingNotify("Updating task");
+    setStatus({
+      success: 1,
+      message: "Updating task details...",
+    });
     task.priority = parseInt(task.priority);
     axios
       .put(import.meta.env.VITE_API_URL + "/api/tasks/update", task, {
@@ -74,28 +81,40 @@ export default function Completed() {
       })
       .then((res) => {
         if (res.data === "Task details updated") {
-          SuccessNotify(res.data);
+          setStatus({
+            success: 0,
+            message: "Task details updated successfully",
+          });
           if (!task.is_completed) {
             setTasks((prev) => prev.filter((t) => t._id !== task._id));
           }
           return;
         }
-        ErrorNotify(res.data);
+        setStatus({
+          success: 2,
+          message: res.data || "Failed to update task details",
+        });
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data);
-      })
-      .finally(() => {
-        DismissToast(toastId);
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to update task details",
+        });
       });
   };
 
   const handleDelete = () => {
     if (!taskToDelete._id) {
-      ErrorNotify("Please refresh the page and try again");
+      setStatus({
+        success: 2,
+        message: "No task selected for deletion",
+      });
       return;
     }
-    const toastId = LoadingNotify("Deleting task...");
+    setStatus({
+      success: 1,
+      message: "Deleting task...",
+    });
     axios
       .delete(
         import.meta.env.VITE_API_URL +
@@ -108,16 +127,24 @@ export default function Completed() {
       .then((res) => {
         if (res.data === "Task deleted successfully") {
           setTasks((prev) => prev.filter((t) => t._id !== taskToDelete._id));
-          SuccessNotify(res.data);
+          setStatus({
+            success: 0,
+            message: "Task deleted successfully",
+          });
         } else {
-          ErrorNotify(res.data);
+          setStatus({
+            success: 2,
+            message: res.data || "Failed to delete task",
+          });
         }
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data || "Failed to delete task");
+        setStatus({
+          success: 2,
+          message: err.response?.data || "Failed to delete task",
+        });
       })
       .finally(() => {
-        DismissToast(toastId);
         setDeletePopup(false);
       });
   };
@@ -152,6 +179,19 @@ export default function Completed() {
       <div className="text-center items-center mb-8 text-white font-bold text-4xl">
         Completed tasks
       </div>
+      {status.message && (
+        <div
+          className={`p-4 mb-4 rounded-lg ${
+            status.success === 0
+              ? "bg-green-100 text-green-800"
+              : status.success === 1
+              ? "bg-blue-100 text-blue-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          <p className="text-sm">{status.message}</p>
+        </div>
+      )}
       <div className="flex flex-col space-y-4">
         {tasks.length > 0 &&
           tasks.map((task, i) => (

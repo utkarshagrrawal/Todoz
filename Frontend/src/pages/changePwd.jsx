@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { ErrorNotify } from "../components/toast";
 import CheckIcon from "../components/icons/check";
 import WarningIcon from "../components/icons/warning";
 
@@ -19,6 +18,10 @@ export default function ChangePassword() {
     "At least 1 special character",
     "Password length between 12 and 48 characters",
   ];
+  const [status, setStatus] = useState({
+    success: false,
+    message: "",
+  });
 
   useEffect(() => {
     axios
@@ -33,7 +36,10 @@ export default function ChangePassword() {
           window.location.href =
             "/login?redirect=" + encodeURIComponent("/change-password");
         }
-        ErrorNotify(err.response?.data);
+        setStatus({
+          success: false,
+          message: err.response?.data || "Failed to fetch user details",
+        })
       });
   }, []);
 
@@ -58,11 +64,17 @@ export default function ChangePassword() {
     e.preventDefault();
 
     if (score.length !== 5) {
-      ErrorNotify("Password does not meet requirements");
+      setStatus({
+        success: false,
+        message: "Password does not meet the required conditions",
+      });
       return;
     }
     if (passwords.newPassword !== passwords.confirmPassword) {
-      ErrorNotify("Passwords do not match");
+      setStatus({
+        success: false,
+        message: "Passwords do not match",
+      });
       return;
     }
 
@@ -80,7 +92,10 @@ export default function ChangePassword() {
         }
       })
       .catch((err) => {
-        ErrorNotify(err.response?.data);
+        setStatus({
+          success: false,
+          message: err.response?.data || "Failed to change password",
+        });
       });
   };
 
@@ -90,7 +105,17 @@ export default function ChangePassword() {
         <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
           Change Password
         </h2>
-
+        {status.message && (
+          <div
+            className={`p-4 mb-4 rounded-lg ${
+              status.success
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            <p className="text-sm">{status.message}</p>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Old Password */}
           <div className="flex flex-col">
