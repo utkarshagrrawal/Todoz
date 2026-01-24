@@ -4,20 +4,21 @@ import DeleteIcon from "../../components/icons/trash";
 import "./datepicker.css";
 
 export default function TodayTasks() {
-  const [taskData, setTaskData] = useState({
-    description: "",
-    priority: "0",
-    completed: false,
-  });
-  const [tasks, setTasks] = useState([]);
-  const [page, setPage] = useState(1);
-  const scroll = useRef(0);
-  const [deletePopup, setDeletePopup] = useState(false);
-  const [taskToDelete, setTaskToDelete] = useState({});
-  const [status, setStatus] = useState({
-    success: 0,
-    message: "",
-  });
+    const [taskData, setTaskData] = useState({
+      description: "",
+      priority: "0",
+      completed: false,
+    });
+    const [loading, setLoading] = useState(false);
+    const [tasks, setTasks] = useState([]);
+    const [page, setPage] = useState(1);
+    const scroll = useRef(0);
+    const [deletePopup, setDeletePopup] = useState(false);
+    const [taskToDelete, setTaskToDelete] = useState({});
+    const [status, setStatus] = useState({
+      success: 0,
+      message: "",
+    });
 
   useEffect(() => {
     const observer = () => {
@@ -31,6 +32,7 @@ export default function TodayTasks() {
   }, []);
 
   useEffect(() => {
+    if(!loading) return;
     axios
       .get(import.meta.env.VITE_API_URL + "/api/tasks/today?page=" + page, {
         withCredentials: true,
@@ -47,16 +49,8 @@ export default function TodayTasks() {
           success: 2,
           message: err.response?.data || "Failed to fetch tasks",
         });
-      });
-  }, [page]);
-
-  const handleTaskDetails = (e) => {
-    setTaskData((prev) => ({
-      ...prev,
-      [e.target.name]:
-        e.target.name === "completed" ? e.target.checked : e.target.value,
-    }));
-  };
+      }).finally(() => setLoading(false));
+  }, [page, loading]);
 
   const handleSubmit = () => {
     if (!taskData.description || taskData.description.trim() === "") {
@@ -81,9 +75,7 @@ export default function TodayTasks() {
       })
       .then((res) => {
         if (res.data === "Task created successfully") {
-          if (!taskData.completed) {
-            setTasks((prev) => [...prev, taskData]);
-          }
+          setLoading(true);
           setTaskData({
             description: "",
             priority: "0",
@@ -339,21 +331,21 @@ export default function TodayTasks() {
             type="checkbox"
             name="completed"
             value={taskData.completed}
-            onChange={handleTaskDetails}
+            onChange={(e) => setTaskData(prev => ({...prev, completed: e.target.checked}))}
             className="size-7 text-blue-500 border-gray-500 rounded-full transition-all"
           />
           <input
             className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             name="description"
             value={taskData.description}
-            onChange={handleTaskDetails}
+            onChange={(e) => setTaskData(prev => ({...prev, description: e.target.value}))}
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             placeholder="Add a new task..."
           />
           <select
             name="priority"
             value={taskData.priority}
-            onChange={handleTaskDetails}
+            onChange={(e) => setTaskData(prev => ({...prev, priority: e.target.value}))}
             className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           >
             <option value="0">Low</option>
