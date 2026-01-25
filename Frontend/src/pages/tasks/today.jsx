@@ -10,16 +10,7 @@ export default function TodayTasks() {
   });
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState([]);
-  const [page, setPage] = useState(1);
-  const scroll = useRef(0);
-  const [deletePopup, setDeletePopup] = useState(false);
-  const [taskToDelete, setTaskToDelete] = useState({});
-  const [status, setStatus] = useState({
-    success: 0,
-    message: "",
-  });
-
-  useEffect(() => {
+  const [page, setPage] = useState(() => {
     // Calculate initial page based on viewport height
     // Approximate task row height: ~52px (based on padding, border, and content)
     const taskRowHeight = 52;
@@ -30,11 +21,18 @@ export default function TodayTasks() {
     const initialTasksNeeded = Math.ceil(availableHeight / taskRowHeight);
     const initialPages = Math.ceil(initialTasksNeeded / tasksPerPage);
     
-    // Set initial page to load enough tasks to fill viewport
-    if (initialPages > 1) {
-      setPage(initialPages);
-    }
+    // Return initial page to load enough tasks to fill viewport
+    return Math.max(1, initialPages);
+  });
+  const scroll = useRef(0);
+  const [deletePopup, setDeletePopup] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState({});
+  const [status, setStatus] = useState({
+    success: 0,
+    message: "",
+  });
 
+  useEffect(() => {
     const observer = () => {
       if (window.scrollY - scroll.current > 100) {
         setPage((prev) => prev + 1);
