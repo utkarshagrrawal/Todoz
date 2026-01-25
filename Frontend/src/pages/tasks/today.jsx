@@ -2,6 +2,11 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import DeleteIcon from "../../components/icons/trash";
 
+// Constants for viewport calculations
+const TASK_ROW_HEIGHT = 52; // Approximate height in pixels (padding, border, content)
+const HEADER_AND_PADDING = 200; // Space for header, title, and padding
+const TASKS_PER_PAGE = 10; // Backend page size
+
 export default function TodayTasks() {
   const [taskData, setTaskData] = useState({
     description: "",
@@ -10,7 +15,16 @@ export default function TodayTasks() {
   });
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => {
+    // Calculate initial page based on viewport height
+    const viewportHeight = window.innerHeight;
+    const availableHeight = viewportHeight - HEADER_AND_PADDING;
+    const initialTasksNeeded = Math.ceil(availableHeight / TASK_ROW_HEIGHT);
+    const initialPages = Math.ceil(initialTasksNeeded / TASKS_PER_PAGE);
+    
+    // Return initial page to load enough tasks to fill viewport
+    return Math.max(1, initialPages);
+  });
   const scroll = useRef(0);
   const [deletePopup, setDeletePopup] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState({});
@@ -74,6 +88,8 @@ export default function TodayTasks() {
       })
       .then((res) => {
         if (res.data === "Task created successfully") {
+          // Reset to page 1 and reload to show the newly added task
+          setPage(1);
           setLoading(true);
           setTaskData({
             description: "",
