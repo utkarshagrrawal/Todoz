@@ -89,9 +89,9 @@ export default function NonCompletedTasks() {
       })
       .then((res) => {
         if (res.data === "Task created successfully") {
+          // Reset to page 1 and reload to show the newly added task
+          setPage(1);
           setLoading(true);
-          // Increase page count to ensure new task is loaded
-          setPage((prev) => prev + 1);
           setStatus({
             success: 0,
             message: "Task created successfully",

@@ -88,9 +88,9 @@ export default function TodayTasks() {
       })
       .then((res) => {
         if (res.data === "Task created successfully") {
+          // Reset to page 1 and reload to show the newly added task
+          setPage(1);
           setLoading(true);
-          // Increase page count to ensure new task is loaded
-          setPage((prev) => prev + 1);
           setTaskData({
             description: "",
             priority: "0",
