@@ -21,6 +21,21 @@ export default function NonCompletedTasks() {
   const scroll = useRef(0);
 
   useEffect(() => {
+    // Calculate initial page based on viewport height
+    // Approximate task row height: ~52px (based on padding, border, and content)
+    const taskRowHeight = 52;
+    const viewportHeight = window.innerHeight;
+    const headerAndPadding = 200; // Account for header, title, and padding
+    const availableHeight = viewportHeight - headerAndPadding;
+    const tasksPerPage = 10; // Backend page size
+    const initialTasksNeeded = Math.ceil(availableHeight / taskRowHeight);
+    const initialPages = Math.ceil(initialTasksNeeded / tasksPerPage);
+    
+    // Set initial page to load enough tasks to fill viewport
+    if (initialPages > 1) {
+      setPage(initialPages);
+    }
+
     const observer = () => {
       if (window.scrollY - scroll.current > 100) {
         setPage((prev) => prev + 1);
@@ -76,6 +91,8 @@ export default function NonCompletedTasks() {
       .then((res) => {
         if (res.data === "Task created successfully") {
           setLoading(true);
+          // Increase page count to ensure new task is loaded
+          setPage((prev) => prev + 1);
           setStatus({
             success: 0,
             message: "Task created successfully",
