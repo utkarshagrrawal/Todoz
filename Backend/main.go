@@ -15,6 +15,7 @@ func main() {
 	mainRouter.Use(middleware.ApplyCors)
 	mainRouter.Use(middleware.RequestsLogging)
 	mainRouter.Use(middleware.CatchError)
+	mainRouter.Use(middleware.RateLimitMiddleware)
 
 	mainRouter.PathPrefix("/api/user").Handler(http.StripPrefix("/api/user", routes.UserRouter()))
 	mainRouter.PathPrefix("/api/tasks").Handler(http.StripPrefix("/api/tasks", routes.TaskRouter()))

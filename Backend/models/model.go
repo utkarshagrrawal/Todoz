@@ -16,6 +16,12 @@ type User struct {
 	IsDeleted  bool   `bson:"isDeleted" json:"isDeleted"`
 }
 
+type RateLimiter struct {
+	Requests  int    `bson:"requests" json:"requests"`
+	ExpiresAt int64  `bson:"expiresAt" json:"expiresAt"`
+	UserIP    string `bson:"userIP" json:"userIP"`
+}
+
 type UserLogin struct {
 	Email      string `bson:"email" json:"email"`
 	Password   string `bson:"password" json:"password"`
