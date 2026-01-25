@@ -1,24 +1,23 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import DeleteIcon from "../../components/icons/trash";
-import "./datepicker.css";
 
 export default function TodayTasks() {
-    const [taskData, setTaskData] = useState({
-      description: "",
-      priority: "0",
-      completed: false,
-    });
-    const [loading, setLoading] = useState(false);
-    const [tasks, setTasks] = useState([]);
-    const [page, setPage] = useState(1);
-    const scroll = useRef(0);
-    const [deletePopup, setDeletePopup] = useState(false);
-    const [taskToDelete, setTaskToDelete] = useState({});
-    const [status, setStatus] = useState({
-      success: 0,
-      message: "",
-    });
+  const [taskData, setTaskData] = useState({
+    description: "",
+    priority: "0",
+    completed: false,
+  });
+  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState([]);
+  const [page, setPage] = useState(1);
+  const scroll = useRef(0);
+  const [deletePopup, setDeletePopup] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState({});
+  const [status, setStatus] = useState({
+    success: 0,
+    message: "",
+  });
 
   useEffect(() => {
     const observer = () => {
@@ -163,8 +162,8 @@ export default function TodayTasks() {
     axios
       .delete(
         import.meta.env.VITE_API_URL +
-          "/api/tasks/delete?id=" +
-          taskToDelete._id,
+        "/api/tasks/delete?id=" +
+        taskToDelete._id,
         {
           withCredentials: true,
         }
@@ -195,11 +194,10 @@ export default function TodayTasks() {
   };
 
   return (
-    <section className="w-full min-h-screen ml-16 p-6 bg-gray-950">
+    <section className="w-full min-h-screen ml-16 p-6">
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md z-50 flex justify-center items-center ${
-          !deletePopup && "hidden"
-        }`}
+        className={`fixed inset-0 backdrop-blur-md z-50 flex justify-center items-center ${!deletePopup && "hidden"
+          }`}
       >
         <div className="bg-white p-8 rounded-lg shadow-2xl transform transition-all duration-300 ease-in-out max-w-sm w-full">
           <div className="text-gray-900 font-semibold text-2xl mb-6 text-center">
@@ -221,18 +219,17 @@ export default function TodayTasks() {
           </div>
         </div>
       </div>
-      <div className="text-center items-center mb-8 text-white font-bold text-4xl">
+      <div className="text-center items-center mb-8 font-bold text-4xl">
         Today's Tasks
       </div>
       {status.message && (
         <div
-          className={`p-4 mb-4 rounded-lg ${
-            status.success === 0
-              ? "bg-green-100 text-green-800"
-              : status.success === 1
+          className={`p-4 mb-4 rounded-lg ${status.success === 0
+            ? "bg-green-100 text-green-800"
+            : status.success === 1
               ? "bg-yellow-100 text-yellow-800"
               : "bg-red-100 text-red-800"
-          }`}
+            }`}
         >
           <p className="text-sm">{status.message}</p>
         </div>
@@ -259,13 +256,12 @@ export default function TodayTasks() {
                 }}
               />
               <input
-                className={`w-full border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  task.status === "overdue"
-                    ? "bg-red-700"
-                    : task.status === "completed"
+                className={`w-full border border-gray-600 rounded-md px-4 py-1 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${task.status === "overdue"
+                  ? "bg-red-700"
+                  : task.status === "completed"
                     ? "bg-green-700"
                     : "bg-transparent"
-                }`}
+                  }`}
                 value={task.description}
                 onChange={(e) =>
                   setTasks((prev) =>
@@ -279,7 +275,6 @@ export default function TodayTasks() {
                 onKeyDown={(e) => e.key === "Enter" && handleUpdate(task)}
               />
               <select
-                name="priority"
                 value={task.priority}
                 onChange={(e) => {
                   setTasks((prev) =>
@@ -292,7 +287,7 @@ export default function TodayTasks() {
                   task.priority = e.target.value;
                   handleUpdate(task);
                 }}
-                className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="bg-transparent border border-gray-600 rounded-md px-4 py-1 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
                 <option value="0">Low</option>
                 <option value="1">Medium</option>
@@ -313,40 +308,37 @@ export default function TodayTasks() {
                   task.deadline = new Date(e.target.value).toISOString();
                   handleUpdate(task);
                 }}
-                className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 max-w-36 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full border border-gray-600 rounded-md px-4 py-1 max-w-36 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               />
               <button
-                className="border border-gray-600 bg-transparent text-white font-medium p-2 rounded-lg shadow-md hover:bg-red-700 transition flex items-center"
+                className="border border-gray-600 bg-transparent font-medium p-2 rounded-lg shadow-md hover:bg-red-700 transition flex items-center"
                 onClick={() => {
                   setDeletePopup(true);
                   setTaskToDelete(task);
                 }}
               >
-                <DeleteIcon className="text-white w-5 h-5" />
+                <DeleteIcon className="w-5 h-5" />
               </button>
             </div>
           ))}
         <div className="flex items-center space-x-4">
           <input
             type="checkbox"
-            name="completed"
             value={taskData.completed}
-            onChange={(e) => setTaskData(prev => ({...prev, completed: e.target.checked}))}
+            onChange={(e) => setTaskData(prev => ({ ...prev, completed: e.target.checked }))}
             className="size-7 text-blue-500 border-gray-500 rounded-full transition-all"
           />
           <input
-            className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            name="description"
+            className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             value={taskData.description}
-            onChange={(e) => setTaskData(prev => ({...prev, description: e.target.value}))}
+            onChange={(e) => setTaskData(prev => ({ ...prev, description: e.target.value }))}
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             placeholder="Add a new task..."
           />
           <select
-            name="priority"
             value={taskData.priority}
-            onChange={(e) => setTaskData(prev => ({...prev, priority: e.target.value}))}
-            className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            onChange={(e) => setTaskData(prev => ({ ...prev, priority: e.target.value }))}
+            className="bg-transparent border border-gray-600 rounded-md px-4 py-1 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           >
             <option value="0">Low</option>
             <option value="1">Medium</option>

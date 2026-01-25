@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import "./datepicker.css";
 import DeleteIcon from "../../components/icons/trash";
 
 export default function NonCompletedTasks() {
@@ -10,6 +9,7 @@ export default function NonCompletedTasks() {
     completed: false,
     deadline: new Date(),
   });
+  const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState([]);
   const [page, setPage] = useState(1);
   const [deletePopup, setDeletePopup] = useState(false);
@@ -32,13 +32,11 @@ export default function NonCompletedTasks() {
   }, []);
 
   useEffect(() => {
+    if (!loading) return;
     axios
-      .get(
-        import.meta.env.VITE_API_URL + "/api/tasks/non-completed?page=" + page,
-        {
-          withCredentials: true,
-        }
-      )
+      .get(import.meta.env.VITE_API_URL + "/api/tasks/non-completed?page=" + page, {
+        withCredentials: true,
+      })
       .then((res) => {
         if (res.data?.length > 0) {
           page === 1
@@ -51,16 +49,8 @@ export default function NonCompletedTasks() {
           success: 2,
           message: err.response?.data || "Failed to fetch tasks",
         });
-      });
-  }, [page]);
-
-  const handleTaskDetails = (e) => {
-    setTaskData((prev) => ({
-      ...prev,
-      [e.target.name]:
-        e.target.name === "completed" ? e.target.checked : e.target.value,
-    }));
-  };
+      }).finally(() => setLoading(false));
+  }, [page, loading]);
 
   const handleSubmit = () => {
     if (!taskData.description || taskData.description.trim() === "") {
@@ -85,13 +75,11 @@ export default function NonCompletedTasks() {
       })
       .then((res) => {
         if (res.data === "Task created successfully") {
+          setLoading(true);
           setStatus({
             success: 0,
             message: "Task created successfully",
           });
-          if (!taskData.completed) {
-            setTasks((prev) => [...prev, taskData]);
-          }
           setTaskData({
             description: "",
             priority: "0",
@@ -173,8 +161,8 @@ export default function NonCompletedTasks() {
     axios
       .delete(
         import.meta.env.VITE_API_URL +
-          "/api/tasks/delete?id=" +
-          taskToDelete._id,
+        "/api/tasks/delete?id=" +
+        taskToDelete._id,
         {
           withCredentials: true,
         }
@@ -205,11 +193,10 @@ export default function NonCompletedTasks() {
   };
 
   return (
-    <section className="w-full min-h-screen ml-16 p-6 bg-gray-950">
+    <section className="w-full min-h-screen ml-16 p-6">
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md z-50 flex justify-center items-center ${
-          !deletePopup && "hidden"
-        }`}
+        className={`fixed inset-0 bg-opacity-50 backdrop-blur-md z-50 flex justify-center items-center ${!deletePopup && "hidden"
+          }`}
       >
         <div className="bg-white p-8 rounded-lg shadow-2xl transform transition-all duration-300 ease-in-out max-w-sm w-full">
           <div className="text-gray-900 font-semibold text-2xl mb-6 text-center">
@@ -231,18 +218,17 @@ export default function NonCompletedTasks() {
           </div>
         </div>
       </div>
-      <div className="text-center items-center mb-8 text-white font-bold text-4xl">
+      <div className="text-center items-center mb-8 font-bold text-4xl">
         All incomplete tasks
       </div>
       {status.message && (
         <div
-          className={`p-4 mb-4 rounded-lg ${
-            status.success === 0
-              ? "bg-green-100 text-green-800"
-              : status.success === 1
+          className={`p-4 mb-4 rounded-lg ${status.success === 0
+            ? "bg-green-100 text-green-800"
+            : status.success === 1
               ? "bg-blue-100 text-blue-800"
               : "bg-red-100 text-red-800"
-          }`}
+            }`}
         >
           <p className="text-sm">{status.message}</p>
         </div>
@@ -268,13 +254,12 @@ export default function NonCompletedTasks() {
                 }}
               />
               <input
-                className={`w-full border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  task.status === "overdue"
-                    ? "bg-red-700"
-                    : task.status === "completed"
+                className={`w-full border border-gray-600 rounded-md px-4 py-1 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${task.status === "overdue"
+                  ? "bg-red-700"
+                  : task.status === "completed"
                     ? "bg-green-700"
                     : "bg-transparent"
-                }`}
+                  }`}
                 value={task.description}
                 onChange={(e) =>
                   setTasks((prev) =>
@@ -288,7 +273,6 @@ export default function NonCompletedTasks() {
                 onKeyDown={(e) => e.key === "Enter" && handleUpdate(task)}
               />
               <select
-                name="priority"
                 value={task.priority}
                 onChange={(e) => {
                   setTasks((prev) =>
@@ -301,7 +285,7 @@ export default function NonCompletedTasks() {
                   task.priority = e.target.value;
                   handleUpdate(task);
                 }}
-                className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="border border-gray-600 rounded-md px-4 py-1 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
                 <option value="0">Low</option>
                 <option value="1">Medium</option>
@@ -322,40 +306,52 @@ export default function NonCompletedTasks() {
                   task.deadline = new Date(e.target.value).toISOString();
                   handleUpdate(task);
                 }}
-                className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 max-w-36 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 max-w-36 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               />
               <button
-                className="border border-gray-600 bg-transparent text-white font-medium p-2 rounded-lg shadow-md hover:bg-red-700 transition flex items-center"
+                className="border border-gray-600 bg-transparent font-medium p-2 rounded-lg shadow-md hover:bg-red-700 transition flex items-center hover:cursor-pointer"
                 onClick={() => {
                   setDeletePopup(true);
                   setTaskToDelete(task);
                 }}
               >
-                <DeleteIcon className="text-white w-5 h-5" />
+                <DeleteIcon className="w-5 h-5" />
               </button>
             </div>
           ))}
         <div className="flex items-center space-x-4">
           <input
             type="checkbox"
-            name="completed"
-            value={taskData.completed}
-            onChange={handleTaskDetails}
+            checked={taskData.completed}
+            onChange={(e) =>
+              setTaskData((prev) => ({
+                ...prev,
+                completed: e.target.checked,
+              }))
+            }
             className="size-7 text-blue-500 border-gray-500 rounded-full transition-all"
           />
           <input
-            className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            name="description"
+            className="w-full border border-gray-600 rounded-md px-4 py-1 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             value={taskData.description}
-            onChange={handleTaskDetails}
+            onChange={(e) =>
+              setTaskData((prev) => ({
+                ...prev,
+                description: e.target.value,
+              }))
+            }
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             placeholder="Add a new task..."
           />
           <select
-            name="priority"
             value={taskData.priority}
-            onChange={handleTaskDetails}
-            className="bg-transparent border border-gray-600 rounded-md px-4 py-1 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            onChange={(e) =>
+              setTaskData((prev) => ({
+                ...prev,
+                priority: e.target.value,
+              }))
+            }
+            className="border border-gray-600 rounded-md px-4 py-1 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           >
             <option value="0">Low</option>
             <option value="1">Medium</option>
@@ -363,11 +359,15 @@ export default function NonCompletedTasks() {
           </select>
           <input
             type="date"
-            name="deadline"
             value={new Date(taskData.deadline).toISOString().split("T")[0]}
             min={new Date().toISOString().split("T")[0]}
-            onChange={handleTaskDetails}
-            className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-1 max-w-36 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            onChange={(e) => {
+              setTaskData((prev) => ({
+                ...prev,
+                deadline: e.target.value,
+              }));
+            }}
+            className="w-full border border-gray-600 rounded-md px-4 py-1 max-w-36 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
         </div>
       </div>
